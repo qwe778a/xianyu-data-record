@@ -6,6 +6,8 @@
   <title>闲鱼数据记录</title>
 
   <style>
+    *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family:Arial,sans-serif;
@@ -42,7 +44,6 @@
 
     input,select,textarea{
       width:100%;
-      box-sizing:border-box;
       padding:13px;
       border:1px solid #dbe2ea;
       border-radius:9px;
@@ -72,14 +73,65 @@
     }
 
     button{
-      width:100%;
       padding:13px;
-      margin-top:18px;
       border:0;
       border-radius:9px;
-      background:#2563eb;
-      color:white;
       font-size:16px
+    }
+
+    .save-button{
+      width:100%;
+      margin-top:18px;
+      background:#2563eb;
+      color:white
+    }
+
+    .cancel-button{
+      width:100%;
+      margin-top:10px;
+      background:#e5e7eb;
+      color:#374151;
+      display:none
+    }
+
+    .order-card{
+      border:1px solid #e2e8f0;
+      border-radius:12px;
+      padding:15px;
+      margin-top:12px
+    }
+
+    .order-title{
+      font-size:18px;
+      font-weight:bold;
+      margin-bottom:8px
+    }
+
+    .order-line{
+      color:#475569;
+      margin:6px 0;
+      word-break:break-all
+    }
+
+    .profit-positive{
+      color:#16a34a;
+      font-weight:bold
+    }
+
+    .profit-negative{
+      color:#dc2626;
+      font-weight:bold
+    }
+
+    .edit-button{
+      width:100%;
+      margin-top:12px;
+      background:#eef4ff;
+      color:#2563eb
+    }
+
+    .empty{
+      color:#64748b
     }
   </style>
 </head>
@@ -89,8 +141,11 @@
   <h1>闲鱼数据记录</h1>
   <p>记录订单、库存、收款和售后。</p>
 
-  <div class="box">
-    <h2>新增订单</h2>
+  <div class="box" id="formBox">
+    <h2 id="formTitle">新增订单</h2>
+
+    <label>日期</label>
+    <input id="date" type="date">
 
     <label>网络和版本</label>
     <select id="version" onchange="checkVersion()">
@@ -127,42 +182,72 @@
     <input id="trackingNumber" placeholder="请输入快递单号">
 
     <label>收货地址</label>
-    <textarea id="address" placeholder="请输入收货人、手机号和详细地址"></textarea>
+    <textarea id="address"
+      placeholder="请输入收货人、手机号和详细地址"></textarea>
 
     <div class="two-fields">
       <div>
         <label>成本</label>
-        <input id="cost" type="number" placeholder="成本"
-               oninput="calculateProfit()">
+        <input id="cost" type="number" step="0.01"
+          placeholder="成本" oninput="calculateProfit()">
       </div>
 
       <div>
         <label>售价</label>
-        <input id="price" type="number" placeholder="售价"
-               oninput="calculateProfit()">
+        <input id="price" type="number" step="0.01"
+          placeholder="售价" oninput="calculateProfit()">
       </div>
     </div>
 
     <label>利润</label>
     <input id="profit" placeholder="自动计算" readonly>
 
-    <button>保存订单</button>
+    <button class="save-button" id="saveButton"
+      onclick="saveOrder()">保存订单</button>
+
+    <button class="cancel-button" id="cancelButton"
+      onclick="cancelEdit()">取消编辑</button>
   </div>
 
   <div class="box">
     <h2>我的数据</h2>
-    <p>暂时还没有订单记录。</p>
+    <div id="orderList"></div>
   </div>
 </main>
 
 <script>
+  const storageKey = "xianyuOrders";
+  let editingId = null;
+  let orders = [];
+
+  try {
+    orders = JSON.parse(localStorage.getItem(storageKey)) || [];
+  } catch {
+    orders = [];
+  }
+
+  function getToday() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return year + "-" + month + "-" + day;
+  }
+
+  function formatDate(date) {
+    if (!date) return "";
+    const parts = date.split("-");
+    return Number(parts[1]) + "月" + Number(parts[2]) + "日";
+  }
+
   function checkVersion() {
     const version = document.getElementById("version").value;
     const fingerprintField =
       document.getElementById("fingerprintField");
-    const optionRow = document.getElementById("optionRow");
     const fingerprint =
       document.getElementById("fingerprint");
+    const optionRow =
+      document.getElementById("optionRow");
 
     if (version.includes("纯原")) {
       fingerprintField.style.display = "none";
@@ -188,6 +273,188 @@
       profit.value = "";
     }
   }
+
+  function saveOrder() {
+    const version =
+      document.getElementById("version").value;
+    const capacity =
+      document.getElementById("capacity").value;
+    const fingerprint =
+      document.getElementById("fingerprint").value;
+    const trackingNumber =
+      document.getElementById("trackingNumber").value.trim();
+    const address =
+      document.getElementById("address").value.trim();
+    const cost =
+      document.getElementById("cost").value;
+    const price =
+      document.getElementById("price").value;
+    const profit =
+      document.getElementById("profit").value;
+    const date =
+      document.getElementById("date").value;
+
+    if (!version || !capacity || !cost || !price) {
+      alert("请填写型号、容量、成本和售价");
+      return;
+    }
+
+    const order = {
+      id: editingId || Date.now(),
+      date,
+      version,
+      capacity,
+      fingerprint: version.includes("纯原")
+        ? "不适用"
+        : fingerprint,
+      trackingNumber,
+      address,
+      cost,
+      price,
+      profit
+    };
+
+    if (editingId) {
+      const index = orders.findIndex(
+        item => item.id === editingId
+      );
+
+      if (index !== -1) {
+        orders[index] = order;
+      }
+    } else {
+      orders.unshift(order);
+    }
+
+    localStorage.setItem(storageKey, JSON.stringify(orders));
+    resetForm();
+    renderOrders();
+  }
+
+  function editOrder(id) {
+    const order = orders.find(item => item.id === id);
+    if (!order) return;
+
+    editingId = id;
+
+    document.getElementById("date").value = order.date;
+    document.getElementById("version").value = order.version;
+    document.getElementById("capacity").value = order.capacity;
+    document.getElementById("fingerprint").value =
+      order.fingerprint === "不适用" ? "" : order.fingerprint;
+    document.getElementById("trackingNumber").value =
+      order.trackingNumber;
+    document.getElementById("address").value = order.address;
+    document.getElementById("cost").value = order.cost;
+    document.getElementById("price").value = order.price;
+
+    checkVersion();
+    calculateProfit();
+
+    document.getElementById("formTitle").textContent =
+      "编辑订单";
+    document.getElementById("saveButton").textContent =
+      "保存修改";
+    document.getElementById("cancelButton").style.display =
+      "block";
+
+    document.getElementById("formBox").scrollIntoView({
+      behavior:"smooth"
+    });
+  }
+
+  function cancelEdit() {
+    resetForm();
+  }
+
+  function resetForm() {
+    editingId = null;
+
+    document.getElementById("date").value = getToday();
+    document.getElementById("version").value = "";
+    document.getElementById("capacity").value = "";
+    document.getElementById("fingerprint").value = "";
+    document.getElementById("trackingNumber").value = "";
+    document.getElementById("address").value = "";
+    document.getElementById("cost").value = "";
+    document.getElementById("price").value = "";
+    document.getElementById("profit").value = "";
+
+    document.getElementById("formTitle").textContent =
+      "新增订单";
+    document.getElementById("saveButton").textContent =
+      "保存订单";
+    document.getElementById("cancelButton").style.display =
+      "none";
+
+    checkVersion();
+  }
+
+  function safeText(value) {
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function renderOrders() {
+    const list = document.getElementById("orderList");
+
+    if (orders.length === 0) {
+      list.innerHTML =
+        '<p class="empty">暂时还没有订单记录。</p>';
+      return;
+    }
+
+    list.innerHTML = orders.map(order => {
+      const profitClass =
+        Number(order.profit) >= 0
+          ? "profit-positive"
+          : "profit-negative";
+
+      return `
+        <div class="order-card">
+          <div class="order-title">
+            ${safeText(order.version)}
+            ${safeText(order.capacity)}
+            ${safeText(order.fingerprint)}
+          </div>
+
+          <div class="order-line">
+            日期：${safeText(formatDate(order.date))}
+          </div>
+
+          <div class="order-line">
+            快递单号：${safeText(order.trackingNumber || "未填写")}
+          </div>
+
+          <div class="order-line">
+            地址：${safeText(order.address || "未填写")}
+          </div>
+
+          <div class="order-line">
+            成本：¥${safeText(order.cost)}
+            ｜售价：¥${safeText(order.price)}
+          </div>
+
+          <div class="${profitClass}">
+            利润：¥${safeText(order.profit)}
+          </div>
+
+          <button class="edit-button"
+            onclick="editOrder(${order.id})">
+            编辑订单
+          </button>
+        </div>
+      `;
+    }).join("");
+  }
+
+  document.getElementById("date").value = getToday();
+  checkVersion();
+  renderOrders();
 </script>
 </body>
 </html>
