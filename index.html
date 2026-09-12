@@ -29,7 +29,7 @@
     p{color:#64748b}
 
     .box{
-      background:white;
+      background:#fff;
       border-radius:16px;
       padding:18px;
       margin-top:18px
@@ -48,7 +48,7 @@
       border:1px solid #dbe2ea;
       border-radius:9px;
       font-size:16px;
-      background:white
+      background:#fff
     }
 
     textarea{
@@ -83,7 +83,7 @@
       width:100%;
       margin-top:18px;
       background:#2563eb;
-      color:white
+      color:#fff
     }
 
     .cancel-button{
@@ -130,9 +130,8 @@
       color:#2563eb
     }
 
-    .empty{
-      color:#64748b
-    }
+    .empty{color:#64748b}
+    .hidden{display:none}
   </style>
 </head>
 
@@ -176,6 +175,21 @@
           <option>指纹</option>
         </select>
       </div>
+    </div>
+
+    <label>渠道</label>
+    <select id="channel" onchange="checkChannel()">
+      <option value="">请选择</option>
+      <option>阿冰</option>
+      <option>小四</option>
+      <option>鸿福</option>
+      <option>拍机堂</option>
+      <option value="其他">其他</option>
+    </select>
+
+    <div id="customChannelBox" class="hidden">
+      <label>自定义渠道</label>
+      <input id="customChannel" placeholder="请输入渠道名称">
     </div>
 
     <label>快递单号</label>
@@ -229,33 +243,56 @@
   function getToday() {
     const now = new Date();
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
+    const month =
+      String(now.getMonth() + 1).padStart(2, "0");
+    const day =
+      String(now.getDate()).padStart(2, "0");
+
     return year + "-" + month + "-" + day;
   }
 
   function formatDate(date) {
     if (!date) return "";
+
     const parts = date.split("-");
-    return Number(parts[1]) + "月" + Number(parts[2]) + "日";
+
+    return Number(parts[1]) + "月" +
+      Number(parts[2]) + "日";
   }
 
   function checkVersion() {
-    const version = document.getElementById("version").value;
-    const fingerprintField =
+    const version =
+      document.getElementById("version").value;
+    const field =
       document.getElementById("fingerprintField");
     const fingerprint =
       document.getElementById("fingerprint");
-    const optionRow =
+    const row =
       document.getElementById("optionRow");
 
     if (version.includes("纯原")) {
-      fingerprintField.style.display = "none";
+      field.style.display = "none";
       fingerprint.value = "";
-      optionRow.classList.add("single");
+      row.classList.add("single");
     } else {
-      fingerprintField.style.display = "block";
-      optionRow.classList.remove("single");
+      field.style.display = "block";
+      row.classList.remove("single");
+    }
+  }
+
+  function checkChannel() {
+    const channel =
+      document.getElementById("channel").value;
+    const box =
+      document.getElementById("customChannelBox");
+
+    box.classList.toggle(
+      "hidden",
+      channel !== "其他"
+    );
+
+    if (channel !== "其他") {
+      document.getElementById("customChannel").value = "";
     }
   }
 
@@ -264,6 +301,7 @@
       parseFloat(document.getElementById("cost").value);
     const price =
       parseFloat(document.getElementById("price").value);
+
     const profit =
       document.getElementById("profit");
 
@@ -281,43 +319,50 @@
       document.getElementById("capacity").value;
     const fingerprint =
       document.getElementById("fingerprint").value;
-    const trackingNumber =
-      document.getElementById("trackingNumber").value.trim();
-    const address =
-      document.getElementById("address").value.trim();
+    const channel =
+      document.getElementById("channel").value;
+    const customChannel =
+      document.getElementById("customChannel").value.trim();
     const cost =
       document.getElementById("cost").value;
     const price =
       document.getElementById("price").value;
-    const profit =
-      document.getElementById("profit").value;
-    const date =
-      document.getElementById("date").value;
 
-    if (!version || !capacity || !cost || !price) {
-      alert("请填写型号、容量、成本和售价");
+    if (!version || !capacity || !channel ||
+        !cost || !price) {
+      alert("请填写型号、容量、渠道、成本和售价");
+      return;
+    }
+
+    if (channel === "其他" && !customChannel) {
+      alert("请输入自定义渠道名称");
       return;
     }
 
     const order = {
       id: editingId || Date.now(),
-      date,
+      date: document.getElementById("date").value,
       version,
       capacity,
       fingerprint: version.includes("纯原")
         ? "不适用"
         : fingerprint,
-      trackingNumber,
-      address,
+      channel: channel === "其他"
+        ? customChannel
+        : channel,
+      trackingNumber:
+        document.getElementById("trackingNumber").value.trim(),
+      address:
+        document.getElementById("address").value.trim(),
       cost,
       price,
-      profit
+      profit:
+        document.getElementById("profit").value
     };
 
     if (editingId) {
-      const index = orders.findIndex(
-        item => item.id === editingId
-      );
+      const index =
+        orders.findIndex(item => item.id === editingId);
 
       if (index !== -1) {
         orders[index] = order;
@@ -326,29 +371,62 @@
       orders.unshift(order);
     }
 
-    localStorage.setItem(storageKey, JSON.stringify(orders));
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify(orders)
+    );
+
     resetForm();
     renderOrders();
   }
 
   function editOrder(id) {
-    const order = orders.find(item => item.id === id);
+    const order =
+      orders.find(item => item.id === id);
+
     if (!order) return;
 
     editingId = id;
 
-    document.getElementById("date").value = order.date;
-    document.getElementById("version").value = order.version;
-    document.getElementById("capacity").value = order.capacity;
+    document.getElementById("date").value =
+      order.date;
+    document.getElementById("version").value =
+      order.version;
+    document.getElementById("capacity").value =
+      order.capacity;
     document.getElementById("fingerprint").value =
-      order.fingerprint === "不适用" ? "" : order.fingerprint;
+      order.fingerprint === "不适用"
+        ? ""
+        : order.fingerprint;
+
+    const channels = [
+      "阿冰",
+      "小四",
+      "鸿福",
+      "拍机堂"
+    ];
+
+    if (channels.includes(order.channel)) {
+      document.getElementById("channel").value =
+        order.channel;
+      document.getElementById("customChannel").value = "";
+    } else {
+      document.getElementById("channel").value = "其他";
+      document.getElementById("customChannel").value =
+        order.channel;
+    }
+
     document.getElementById("trackingNumber").value =
       order.trackingNumber;
-    document.getElementById("address").value = order.address;
-    document.getElementById("cost").value = order.cost;
-    document.getElementById("price").value = order.price;
+    document.getElementById("address").value =
+      order.address;
+    document.getElementById("cost").value =
+      order.cost;
+    document.getElementById("price").value =
+      order.price;
 
     checkVersion();
+    checkChannel();
     calculateProfit();
 
     document.getElementById("formTitle").textContent =
@@ -359,7 +437,7 @@
       "block";
 
     document.getElementById("formBox").scrollIntoView({
-      behavior:"smooth"
+      behavior: "smooth"
     });
   }
 
@@ -370,15 +448,23 @@
   function resetForm() {
     editingId = null;
 
-    document.getElementById("date").value = getToday();
-    document.getElementById("version").value = "";
-    document.getElementById("capacity").value = "";
-    document.getElementById("fingerprint").value = "";
-    document.getElementById("trackingNumber").value = "";
-    document.getElementById("address").value = "";
-    document.getElementById("cost").value = "";
-    document.getElementById("price").value = "";
-    document.getElementById("profit").value = "";
+    document.getElementById("date").value =
+      getToday();
+
+    [
+      "version",
+      "capacity",
+      "fingerprint",
+      "channel",
+      "customChannel",
+      "trackingNumber",
+      "address",
+      "cost",
+      "price",
+      "profit"
+    ].forEach(id => {
+      document.getElementById(id).value = "";
+    });
 
     document.getElementById("formTitle").textContent =
       "新增订单";
@@ -388,6 +474,7 @@
       "none";
 
     checkVersion();
+    checkChannel();
   }
 
   function safeText(value) {
@@ -400,7 +487,8 @@
   }
 
   function renderOrders() {
-    const list = document.getElementById("orderList");
+    const list =
+      document.getElementById("orderList");
 
     if (orders.length === 0) {
       list.innerHTML =
@@ -427,7 +515,12 @@
           </div>
 
           <div class="order-line">
-            快递单号：${safeText(order.trackingNumber || "未填写")}
+            渠道：${safeText(order.channel || "未填写")}
+          </div>
+
+          <div class="order-line">
+            快递单号：
+            ${safeText(order.trackingNumber || "未填写")}
           </div>
 
           <div class="order-line">
@@ -454,6 +547,7 @@
 
   document.getElementById("date").value = getToday();
   checkVersion();
+  checkChannel();
   renderOrders();
 </script>
 </body>
