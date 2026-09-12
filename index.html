@@ -4,21 +4,82 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>闲鱼数据记录</title>
+
   <style>
-    body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#1f2937}
-    main{max-width:700px;margin:auto;padding:24px 16px}
-    h1{margin:0 0 8px;color:#2563eb}
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:#f5f7fb;
+      color:#1f2937
+    }
+
+    main{
+      max-width:700px;
+      margin:auto;
+      padding:24px 16px
+    }
+
+    h1{
+      margin:0 0 8px;
+      color:#2563eb
+    }
+
     p{color:#64748b}
-    .box{background:white;border-radius:16px;padding:18px;margin-top:18px}
-    label{display:block;margin-top:14px;margin-bottom:6px;font-weight:bold}
-    input,select{
-      width:100%;box-sizing:border-box;padding:13px;
-      border:1px solid #dbe2ea;border-radius:9px;font-size:16px;
+
+    .box{
+      background:white;
+      border-radius:16px;
+      padding:18px;
+      margin-top:18px
+    }
+
+    label{
+      display:block;
+      margin-top:14px;
+      margin-bottom:6px;
+      font-weight:bold
+    }
+
+    input,select,textarea{
+      width:100%;
+      box-sizing:border-box;
+      padding:13px;
+      border:1px solid #dbe2ea;
+      border-radius:9px;
+      font-size:16px;
       background:white
     }
+
+    textarea{
+      height:90px;
+      resize:vertical
+    }
+
+    .two-fields{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px
+    }
+
+    .two-fields.single{
+      grid-template-columns:1fr
+    }
+
+    #profit{
+      background:#eef4ff;
+      color:#2563eb;
+      font-weight:bold
+    }
+
     button{
-      width:100%;padding:13px;margin-top:18px;border:0;
-      border-radius:9px;background:#2563eb;color:white;font-size:16px
+      width:100%;
+      padding:13px;
+      margin-top:18px;
+      border:0;
+      border-radius:9px;
+      background:#2563eb;
+      color:white;
+      font-size:16px
     }
   </style>
 </head>
@@ -42,30 +103,48 @@
       <option>无锁纯原插卡</option>
     </select>
 
-    <label>储存容量</label>
-    <select id="capacity">
-      <option value="">请选择</option>
-      <option>32</option>
-      <option>128</option>
-    </select>
+    <div class="two-fields" id="optionRow">
+      <div>
+        <label>储存容量</label>
+        <select id="capacity">
+          <option value="">请选择</option>
+          <option>32</option>
+          <option>128</option>
+        </select>
+      </div>
 
-    <div id="fingerprintBox">
-      <label>指纹功能</label>
-      <select id="fingerprint">
-        <option value="">请选择</option>
-        <option>无指纹</option>
-        <option>指纹</option>
-      </select>
+      <div id="fingerprintField">
+        <label>指纹功能</label>
+        <select id="fingerprint">
+          <option value="">请选择</option>
+          <option>无指纹</option>
+          <option>指纹</option>
+        </select>
+      </div>
     </div>
 
-    <label>订单号</label>
-    <input placeholder="请输入订单号">
+    <label>快递单号</label>
+    <input id="trackingNumber" placeholder="请输入快递单号">
 
-    <label>成本</label>
-    <input type="number" placeholder="请输入成本">
+    <label>收货地址</label>
+    <textarea id="address" placeholder="请输入收货人、手机号和详细地址"></textarea>
 
-    <label>售价</label>
-    <input type="number" placeholder="请输入售价">
+    <div class="two-fields">
+      <div>
+        <label>成本</label>
+        <input id="cost" type="number" placeholder="成本"
+               oninput="calculateProfit()">
+      </div>
+
+      <div>
+        <label>售价</label>
+        <input id="price" type="number" placeholder="售价"
+               oninput="calculateProfit()">
+      </div>
+    </div>
+
+    <label>利润</label>
+    <input id="profit" placeholder="自动计算" readonly>
 
     <button>保存订单</button>
   </div>
@@ -77,18 +156,38 @@
 </main>
 
 <script>
-function checkVersion() {
-  const version = document.getElementById("version").value;
-  const box = document.getElementById("fingerprintBox");
-  const fingerprint = document.getElementById("fingerprint");
+  function checkVersion() {
+    const version = document.getElementById("version").value;
+    const fingerprintField =
+      document.getElementById("fingerprintField");
+    const optionRow = document.getElementById("optionRow");
+    const fingerprint =
+      document.getElementById("fingerprint");
 
-  if (version.includes("纯原")) {
-    box.style.display = "none";
-    fingerprint.value = "";
-  } else {
-    box.style.display = "block";
+    if (version.includes("纯原")) {
+      fingerprintField.style.display = "none";
+      fingerprint.value = "";
+      optionRow.classList.add("single");
+    } else {
+      fingerprintField.style.display = "block";
+      optionRow.classList.remove("single");
+    }
   }
-}
+
+  function calculateProfit() {
+    const cost =
+      parseFloat(document.getElementById("cost").value);
+    const price =
+      parseFloat(document.getElementById("price").value);
+    const profit =
+      document.getElementById("profit");
+
+    if (!isNaN(cost) && !isNaN(price)) {
+      profit.value = (price - cost).toFixed(2);
+    } else {
+      profit.value = "";
+    }
+  }
 </script>
 </body>
 </html>
