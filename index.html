@@ -1,212 +1,287 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>闲鱼数据记录</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>闲鱼数据记录</title>
 
-  <style>
-    *{box-sizing:border-box}
+<style>
+*{box-sizing:border-box}
 
-    body{
-      margin:0;
-      font-family:Arial,sans-serif;
-      background:#f5f7fb;
-      color:#1f2937
-    }
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f7fb;
+  color:#1f2937
+}
 
-    main{
-      max-width:750px;
-      margin:auto;
-      padding:22px 15px 50px
-    }
+main{
+  max-width:750px;
+  margin:auto;
+  padding:20px 14px 50px
+}
 
-    h1{
-      margin:0 0 8px;
-      color:#2563eb
-    }
+h1{
+  margin:0 0 6px;
+  color:#2563eb
+}
 
-    h2{margin-top:0}
+h2{margin:0 0 12px}
+p{color:#64748b}
 
-    p{color:#64748b}
+.tabs{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin:18px 0
+}
 
-    .tabs{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:8px;
-      margin:20px 0
-    }
+.tab-button{
+  padding:12px 4px;
+  border:0;
+  border-radius:10px;
+  background:#e5e7eb;
+  color:#475569;
+  font-size:15px
+}
 
-    .tab-button{
-      padding:12px 5px;
-      border:0;
-      border-radius:10px;
-      background:#e5e7eb;
-      color:#475569;
-      font-size:15px
-    }
+.tab-button.active{
+  background:#2563eb;
+  color:white
+}
 
-    .tab-button.active{
-      background:#2563eb;
-      color:white
-    }
+.page{display:none}
+.page.active{display:block}
 
-    .page{display:none}
-    .page.active{display:block}
+.box{
+  background:white;
+  border-radius:16px;
+  padding:17px;
+  margin-top:15px
+}
 
-    .box{
-      background:white;
-      border-radius:16px;
-      padding:18px;
-      margin-top:16px
-    }
+label{
+  display:block;
+  margin-top:13px;
+  margin-bottom:6px;
+  font-weight:bold
+}
 
-    label{
-      display:block;
-      margin-top:14px;
-      margin-bottom:6px;
-      font-weight:bold
-    }
+input,select,textarea{
+  width:100%;
+  padding:13px;
+  border:1px solid #dbe2ea;
+  border-radius:9px;
+  font-size:16px;
+  background:white
+}
 
-    input,select,textarea{
-      width:100%;
-      padding:13px;
-      border:1px solid #dbe2ea;
-      border-radius:9px;
-      font-size:16px;
-      background:white
-    }
+textarea{
+  height:85px;
+  resize:vertical
+}
 
-    textarea{
-      height:90px;
-      resize:vertical
-    }
+.two-fields{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:11px
+}
 
-    .two-fields{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px
-    }
+.two-fields.single{
+  grid-template-columns:1fr
+}
 
-    .two-fields.single{
-      grid-template-columns:1fr
-    }
+.hidden{display:none!important}
 
-    .hidden{display:none}
+.profit-input{
+  background:#eef4ff;
+  color:#2563eb;
+  font-weight:bold
+}
 
-    .profit-input{
-      background:#eef4ff;
-      color:#2563eb;
-      font-weight:bold
-    }
+button{
+  padding:12px;
+  border:0;
+  border-radius:9px;
+  font-size:16px
+}
 
-    button{
-      padding:13px;
-      border:0;
-      border-radius:9px;
-      font-size:16px
-    }
+.primary-button{
+  width:100%;
+  margin-top:17px;
+  background:#2563eb;
+  color:white
+}
 
-    .primary-button{
-      width:100%;
-      margin-top:18px;
-      background:#2563eb;
-      color:white
-    }
+.cancel-button{
+  width:100%;
+  margin-top:9px;
+  background:#e5e7eb;
+  color:#374151;
+  display:none
+}
 
-    .cancel-button{
-      width:100%;
-      margin-top:10px;
-      background:#e5e7eb;
-      color:#374151;
-      display:none
-    }
+.delete-button{
+  width:100%;
+  margin-top:9px;
+  background:#fee2e2;
+  color:#dc2626;
+  display:none
+}
 
-    .summary-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:14px
-    }
+.sold-button{
+  width:100%;
+  margin-top:9px;
+  background:#fff7ed;
+  color:#ea580c
+}
 
-    .summary-card{
-      background:#f8fafc;
-      border:1px solid #e2e8f0;
-      border-radius:12px;
-      padding:14px
-    }
+.sold-box{
+  display:none;
+  margin-top:14px;
+  padding:13px;
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  border-radius:12px
+}
 
-    .summary-label{
-      color:#64748b;
-      font-size:14px
-    }
+.sold-box label{margin-top:0}
 
-    .summary-value{
-      font-size:21px;
-      font-weight:bold;
-      margin-top:5px
-    }
+.summary-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:12px
+}
 
-    .order-card,.inventory-card{
-      border:1px solid #e2e8f0;
-      border-radius:12px;
-      padding:15px;
-      margin-top:12px
-    }
+.summary-card{
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:11px;
+  padding:11px
+}
 
-    .item-title{
-      font-size:18px;
-      font-weight:bold;
-      margin-bottom:8px
-    }
+.summary-label{
+  color:#64748b;
+  font-size:13px
+}
 
-    .item-line{
-      color:#475569;
-      margin:6px 0;
-      word-break:break-all;
-      white-space:pre-wrap
-    }
+.summary-value{
+  font-size:19px;
+  font-weight:bold;
+  margin-top:4px
+}
 
-    .profit-positive{
-      color:#16a34a;
-      font-weight:bold
-    }
+.date-group{
+  margin-top:17px
+}
 
-    .profit-negative{
-      color:#dc2626;
-      font-weight:bold
-    }
+.date-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  padding:8px 2px;
+  border-bottom:1px solid #dbe2ea;
+  font-weight:bold
+}
 
-    .edit-button{
-      width:100%;
-      margin-top:12px;
-      background:#eef4ff;
-      color:#2563eb
-    }
+.daily-profit{
+  color:#16a34a;
+  font-size:14px
+}
 
-    .date-group{
-      margin-top:20px
-    }
+.compact-card{
+  border:1px solid #e2e8f0;
+  border-radius:11px;
+  padding:11px 12px;
+  margin-top:9px;
+  background:white
+}
 
-    .date-heading{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      padding-bottom:8px;
-      border-bottom:1px solid #e2e8f0;
-      font-weight:bold
-    }
+.compact-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px
+}
 
-    .daily-profit{
-      color:#16a34a
-    }
+.item-title{
+  font-size:16px;
+  font-weight:bold
+}
 
-    .empty{
-      color:#64748b;
-      text-align:center;
-      padding:20px 0
-    }
-  </style>
+.profit-positive{
+  color:#16a34a;
+  font-weight:bold;
+  white-space:nowrap
+}
+
+.profit-negative{
+  color:#dc2626;
+  font-weight:bold;
+  white-space:nowrap
+}
+
+.meta-line{
+  color:#64748b;
+  font-size:14px;
+  margin-top:6px;
+  line-height:1.45;
+  word-break:break-all
+}
+
+.money-line{
+  color:#334155;
+  font-size:14px;
+  margin-top:6px
+}
+
+.address-details{
+  margin-top:7px;
+  color:#64748b;
+  font-size:14px
+}
+
+.address-details summary{
+  color:#2563eb;
+  cursor:pointer
+}
+
+.address-text{
+  margin-top:7px;
+  line-height:1.5;
+  white-space:pre-wrap;
+  word-break:break-all
+}
+
+.edit-button{
+  width:100%;
+  padding:9px;
+  margin-top:9px;
+  background:#eef4ff;
+  color:#2563eb;
+  font-size:14px
+}
+
+.inventory-card{
+  border:1px solid #e2e8f0;
+  border-radius:11px;
+  padding:12px;
+  margin-top:9px
+}
+
+.sold-card{
+  border-left:4px solid #f59e0b;
+  background:#fffbeb
+}
+
+.empty{
+  color:#64748b;
+  text-align:center;
+  padding:18px 0
+}
+</style>
 </head>
 
 <body>
@@ -215,29 +290,26 @@
   <p>订单和库存管理</p>
 
   <div class="tabs">
-    <button
-      id="tab-new-order"
+    <button id="tab-new-order"
       class="tab-button active"
       onclick="showPage('new-order')">
       新增订单
     </button>
 
-    <button
-      id="tab-order-list"
+    <button id="tab-order-list"
       class="tab-button"
       onclick="showPage('order-list')">
       订单明细
     </button>
 
-    <button
-      id="tab-inventory"
+    <button id="tab-inventory"
       class="tab-button"
       onclick="showPage('inventory')">
       库存
     </button>
   </div>
 
-  <!-- 新增订单页面 -->
+  <!-- 新增订单 -->
   <section id="page-new-order" class="page active">
     <div class="box" id="orderFormBox">
       <h2 id="orderFormTitle">新增订单</h2>
@@ -288,26 +360,22 @@
 
       <div id="orderCustomChannelBox" class="hidden">
         <label>自定义渠道</label>
-        <input
-          id="orderCustomChannel"
+        <input id="orderCustomChannel"
           placeholder="请输入渠道名称">
       </div>
 
       <label>快递单号</label>
-      <input
-        id="trackingNumber"
+      <input id="trackingNumber"
         placeholder="请输入快递单号">
 
       <label>收货地址</label>
-      <textarea
-        id="address"
+      <textarea id="address"
         placeholder="请输入收货人、手机号和详细地址"></textarea>
 
       <div class="two-fields">
         <div>
           <label>成本</label>
-          <input
-            id="orderCost"
+          <input id="orderCost"
             type="number"
             step="0.01"
             placeholder="成本"
@@ -316,8 +384,7 @@
 
         <div>
           <label>售价</label>
-          <input
-            id="orderPrice"
+          <input id="orderPrice"
             type="number"
             step="0.01"
             placeholder="售价"
@@ -326,36 +393,38 @@
       </div>
 
       <label>利润</label>
-      <input
-        id="orderProfit"
+      <input id="orderProfit"
         class="profit-input"
         placeholder="自动计算"
         readonly>
 
-      <button
-        id="saveOrderButton"
+      <button id="saveOrderButton"
         class="primary-button"
         onclick="saveOrder()">
         保存订单
       </button>
 
-      <button
-        id="cancelOrderButton"
+      <button id="cancelOrderButton"
         class="cancel-button"
         onclick="resetOrderForm()">
         取消编辑
       </button>
+
+      <button id="deleteOrderButton"
+        class="delete-button"
+        onclick="deleteOrder()">
+        删除订单
+      </button>
     </div>
   </section>
 
-  <!-- 订单明细页面 -->
+  <!-- 订单明细 -->
   <section id="page-order-list" class="page">
     <div class="box">
       <h2>订单明细</h2>
 
       <label>选择日期</label>
-      <select
-        id="orderDateFilter"
+      <select id="orderDateFilter"
         onchange="renderOrders()">
         <option value="all">全部日期</option>
       </select>
@@ -386,14 +455,13 @@
     </div>
   </section>
 
-  <!-- 库存页面 -->
+  <!-- 库存 -->
   <section id="page-inventory" class="page">
     <div class="box" id="inventoryFormBox">
       <h2 id="inventoryFormTitle">新增库存</h2>
 
       <label>网络和版本</label>
-      <select
-        id="inventoryVersion"
+      <select id="inventoryVersion"
         onchange="checkInventoryVersion()">
         <option value="">请选择</option>
         <option>Wi-Fi</option>
@@ -425,8 +493,7 @@
       </div>
 
       <label>渠道</label>
-      <select
-        id="inventoryChannel"
+      <select id="inventoryChannel"
         onchange="checkInventoryChannel()">
         <option value="">请选择</option>
         <option>阿冰</option>
@@ -438,31 +505,38 @@
 
       <div id="inventoryCustomChannelBox" class="hidden">
         <label>自定义渠道</label>
-        <input
-          id="inventoryCustomChannel"
+        <input id="inventoryCustomChannel"
           placeholder="请输入渠道名称">
       </div>
 
       <label>成本</label>
-      <input
-        id="inventoryCost"
+      <input id="inventoryCost"
         type="number"
         step="0.01"
         placeholder="请输入库存成本">
 
-      <button
-        id="saveInventoryButton"
+      <button id="saveInventoryButton"
         class="primary-button"
         onclick="saveInventory()">
         添加库存
       </button>
 
-      <button
-        id="cancelInventoryButton"
+      <button id="cancelInventoryButton"
         class="cancel-button"
         onclick="resetInventoryForm()">
         取消编辑
       </button>
+
+      <div id="soldBox" class="sold-box">
+        <label>售卖人单号</label>
+        <input id="soldOrderNumber"
+          placeholder="请先填写售卖人单号">
+
+        <button class="sold-button"
+          onclick="markInventorySold()">
+          标记为已售出
+        </button>
+      </div>
     </div>
 
     <div class="box">
@@ -482,515 +556,427 @@
 
       <div id="inventoryList"></div>
     </div>
+
+    <div class="box">
+      <h2>已售出记录</h2>
+      <div id="soldInventoryList"></div>
+    </div>
   </section>
 </main>
 
 <script>
-  const orderStorageKey = "xianyuOrders";
-  const inventoryStorageKey = "xianyuInventory";
+const orderKey="xianyuOrders";
+const inventoryKey="xianyuInventory";
+const soldKey="xianyuSoldInventory";
 
-  let editingOrderId = null;
-  let editingInventoryId = null;
-  let orders = [];
-  let inventory = [];
+let editingOrderId=null;
+let editingInventoryId=null;
+let orders=[];
+let inventory=[];
+let soldInventory=[];
 
-  try {
-    orders =
-      JSON.parse(localStorage.getItem(orderStorageKey)) || [];
+try{
+  orders=JSON.parse(localStorage.getItem(orderKey))||[];
+  inventory=JSON.parse(localStorage.getItem(inventoryKey))||[];
+  soldInventory=JSON.parse(localStorage.getItem(soldKey))||[];
+}catch{
+  orders=[];
+  inventory=[];
+  soldInventory=[];
+}
 
-    inventory =
-      JSON.parse(localStorage.getItem(inventoryStorageKey)) || [];
-  } catch {
-    orders = [];
-    inventory = [];
+function showPage(name){
+  document.querySelectorAll(".page").forEach(page=>{
+    page.classList.remove("active");
+  });
+
+  document.querySelectorAll(".tab-button").forEach(button=>{
+    button.classList.remove("active");
+  });
+
+  document.getElementById("page-"+name).classList.add("active");
+  document.getElementById("tab-"+name).classList.add("active");
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function getToday(){
+  const now=new Date();
+  const year=now.getFullYear();
+  const month=String(now.getMonth()+1).padStart(2,"0");
+  const day=String(now.getDate()).padStart(2,"0");
+  return year+"-"+month+"-"+day;
+}
+
+function formatDate(date){
+  if(!date)return"未设置日期";
+  const parts=date.split("-");
+  return Number(parts[1])+"月"+Number(parts[2])+"日";
+}
+
+function money(value){
+  return"¥"+(Number(value)||0).toFixed(2);
+}
+
+function safeText(value){
+  return String(value||"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function checkOrderVersion(){
+  const version=document.getElementById("orderVersion").value;
+  const field=document.getElementById("orderFingerprintField");
+  const row=document.getElementById("orderOptionRow");
+
+  if(version.includes("纯原")){
+    field.style.display="none";
+    document.getElementById("orderFingerprint").value="";
+    row.classList.add("single");
+  }else{
+    field.style.display="block";
+    row.classList.remove("single");
+  }
+}
+
+function checkInventoryVersion(){
+  const version=document.getElementById("inventoryVersion").value;
+  const field=document.getElementById("inventoryFingerprintField");
+  const row=document.getElementById("inventoryOptionRow");
+
+  if(version.includes("纯原")){
+    field.style.display="none";
+    document.getElementById("inventoryFingerprint").value="";
+    row.classList.add("single");
+  }else{
+    field.style.display="block";
+    row.classList.remove("single");
+  }
+}
+
+function checkOrderChannel(){
+  const channel=document.getElementById("orderChannel").value;
+  const box=document.getElementById("orderCustomChannelBox");
+
+  box.classList.toggle("hidden",channel!=="其他");
+
+  if(channel!=="其他"){
+    document.getElementById("orderCustomChannel").value="";
+  }
+}
+
+function checkInventoryChannel(){
+  const channel=document.getElementById("inventoryChannel").value;
+  const box=document.getElementById("inventoryCustomChannelBox");
+
+  box.classList.toggle("hidden",channel!=="其他");
+
+  if(channel!=="其他"){
+    document.getElementById("inventoryCustomChannel").value="";
+  }
+}
+
+function calculateProfit(){
+  const cost=parseFloat(
+    document.getElementById("orderCost").value
+  );
+
+  const price=parseFloat(
+    document.getElementById("orderPrice").value
+  );
+
+  document.getElementById("orderProfit").value=
+    !isNaN(cost)&&!isNaN(price)
+      ?(price-cost).toFixed(2)
+      :"";
+}
+
+function getChannel(selectId,customId){
+  const selected=document.getElementById(selectId).value;
+  const custom=document.getElementById(customId).value.trim();
+  return selected==="其他"?custom:selected;
+}
+
+function setChannel(selectId,customId,channel){
+  const normal=["阿冰","小四","鸿福","拍机堂"];
+
+  if(normal.includes(channel)){
+    document.getElementById(selectId).value=channel;
+    document.getElementById(customId).value="";
+  }else if(channel){
+    document.getElementById(selectId).value="其他";
+    document.getElementById(customId).value=channel;
+  }else{
+    document.getElementById(selectId).value="";
+    document.getElementById(customId).value="";
+  }
+}
+
+function saveOrder(){
+  const version=document.getElementById("orderVersion").value;
+  const capacity=document.getElementById("orderCapacity").value;
+  const fingerprint=document.getElementById("orderFingerprint").value;
+  const selectedChannel=document.getElementById("orderChannel").value;
+  const channel=getChannel("orderChannel","orderCustomChannel");
+  const cost=document.getElementById("orderCost").value;
+  const price=document.getElementById("orderPrice").value;
+
+  if(!version||!capacity||!selectedChannel||!cost||!price){
+    alert("请填写型号、容量、渠道、成本和售价");
+    return;
   }
 
-  function showPage(pageName) {
-    document.querySelectorAll(".page").forEach(page => {
-      page.classList.remove("active");
-    });
-
-    document.querySelectorAll(".tab-button").forEach(button => {
-      button.classList.remove("active");
-    });
-
-    document
-      .getElementById("page-" + pageName)
-      .classList.add("active");
-
-    document
-      .getElementById("tab-" + pageName)
-      .classList.add("active");
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+  if(!version.includes("纯原")&&!fingerprint){
+    alert("请选择指纹功能");
+    return;
   }
 
-  function getToday() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month =
-      String(now.getMonth() + 1).padStart(2, "0");
-    const day =
-      String(now.getDate()).padStart(2, "0");
-
-    return year + "-" + month + "-" + day;
+  if(selectedChannel==="其他"&&!channel){
+    alert("请输入自定义渠道名称");
+    return;
   }
 
-  function formatDate(date) {
-    if (!date) return "未设置日期";
+  const order={
+    id:editingOrderId||Date.now(),
+    date:document.getElementById("orderDate").value,
+    version,
+    capacity,
+    fingerprint:version.includes("纯原")
+      ?"不适用"
+      :fingerprint,
+    channel,
+    trackingNumber:
+      document.getElementById("trackingNumber").value.trim(),
+    address:
+      document.getElementById("address").value.trim(),
+    cost,
+    price,
+    profit:
+      document.getElementById("orderProfit").value
+  };
 
-    const parts = date.split("-");
-
-    return Number(parts[1]) +
-      "月" +
-      Number(parts[2]) +
-      "日";
-  }
-
-  function money(value) {
-    return "¥" + (Number(value) || 0).toFixed(2);
-  }
-
-  function safeText(value) {
-    return String(value || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function checkOrderVersion() {
-    const version =
-      document.getElementById("orderVersion").value;
-    const field =
-      document.getElementById("orderFingerprintField");
-    const fingerprint =
-      document.getElementById("orderFingerprint");
-    const row =
-      document.getElementById("orderOptionRow");
-
-    if (version.includes("纯原")) {
-      field.style.display = "none";
-      fingerprint.value = "";
-      row.classList.add("single");
-    } else {
-      field.style.display = "block";
-      row.classList.remove("single");
-    }
-  }
-
-  function checkInventoryVersion() {
-    const version =
-      document.getElementById("inventoryVersion").value;
-    const field =
-      document.getElementById("inventoryFingerprintField");
-    const fingerprint =
-      document.getElementById("inventoryFingerprint");
-    const row =
-      document.getElementById("inventoryOptionRow");
-
-    if (version.includes("纯原")) {
-      field.style.display = "none";
-      fingerprint.value = "";
-      row.classList.add("single");
-    } else {
-      field.style.display = "block";
-      row.classList.remove("single");
-    }
-  }
-
-  function checkOrderChannel() {
-    const channel =
-      document.getElementById("orderChannel").value;
-    const box =
-      document.getElementById("orderCustomChannelBox");
-
-    box.classList.toggle(
-      "hidden",
-      channel !== "其他"
+  if(editingOrderId){
+    const index=orders.findIndex(
+      item=>item.id===editingOrderId
     );
 
-    if (channel !== "其他") {
-      document.getElementById("orderCustomChannel").value = "";
-    }
+    if(index!==-1)orders[index]=order;
+  }else{
+    orders.unshift(order);
   }
 
-  function checkInventoryChannel() {
-    const channel =
-      document.getElementById("inventoryChannel").value;
-    const box =
-      document.getElementById("inventoryCustomChannelBox");
+  localStorage.setItem(orderKey,JSON.stringify(orders));
 
-    box.classList.toggle(
-      "hidden",
-      channel !== "其他"
-    );
+  resetOrderForm();
+  updateDateFilter();
+  renderOrders();
+  showPage("order-list");
+}
 
-    if (channel !== "其他") {
-      document.getElementById(
-        "inventoryCustomChannel"
-      ).value = "";
-    }
+function editOrder(id){
+  const order=orders.find(item=>item.id===id);
+  if(!order)return;
+
+  editingOrderId=id;
+
+  document.getElementById("orderDate").value=
+    order.date||getToday();
+
+  document.getElementById("orderVersion").value=
+    order.version;
+
+  document.getElementById("orderCapacity").value=
+    order.capacity;
+
+  document.getElementById("orderFingerprint").value=
+    order.fingerprint==="不适用"
+      ?""
+      :order.fingerprint;
+
+  setChannel(
+    "orderChannel",
+    "orderCustomChannel",
+    order.channel
+  );
+
+  document.getElementById("trackingNumber").value=
+    order.trackingNumber||"";
+
+  document.getElementById("address").value=
+    order.address||"";
+
+  document.getElementById("orderCost").value=
+    order.cost;
+
+  document.getElementById("orderPrice").value=
+    order.price;
+
+  checkOrderVersion();
+  checkOrderChannel();
+  calculateProfit();
+
+  document.getElementById("orderFormTitle").textContent=
+    "编辑订单";
+
+  document.getElementById("saveOrderButton").textContent=
+    "保存修改";
+
+  document.getElementById("cancelOrderButton").style.display=
+    "block";
+
+  document.getElementById("deleteOrderButton").style.display=
+    "block";
+
+  showPage("new-order");
+}
+
+function deleteOrder(){
+  if(!editingOrderId)return;
+
+  const confirmed=confirm(
+    "确定删除这个订单吗？删除后无法恢复。"
+  );
+
+  if(!confirmed)return;
+
+  orders=orders.filter(
+    order=>order.id!==editingOrderId
+  );
+
+  localStorage.setItem(orderKey,JSON.stringify(orders));
+
+  resetOrderForm();
+  updateDateFilter();
+  renderOrders();
+  showPage("order-list");
+}
+
+function resetOrderForm(){
+  editingOrderId=null;
+
+  [
+    "orderVersion",
+    "orderCapacity",
+    "orderFingerprint",
+    "orderChannel",
+    "orderCustomChannel",
+    "trackingNumber",
+    "address",
+    "orderCost",
+    "orderPrice",
+    "orderProfit"
+  ].forEach(id=>{
+    document.getElementById(id).value="";
+  });
+
+  document.getElementById("orderDate").value=getToday();
+  document.getElementById("orderFormTitle").textContent="新增订单";
+  document.getElementById("saveOrderButton").textContent="保存订单";
+  document.getElementById("cancelOrderButton").style.display="none";
+  document.getElementById("deleteOrderButton").style.display="none";
+
+  checkOrderVersion();
+  checkOrderChannel();
+}
+
+function updateDateFilter(){
+  const filter=document.getElementById("orderDateFilter");
+  const oldValue=filter.value;
+
+  const dates=[
+    ...new Set(
+      orders.map(order=>order.date).filter(Boolean)
+    )
+  ].sort().reverse();
+
+  filter.innerHTML=
+    '<option value="all">全部日期</option>'+
+    dates.map(date=>`
+      <option value="${safeText(date)}">
+        ${safeText(formatDate(date))}
+      </option>
+    `).join("");
+
+  filter.value=
+    dates.includes(oldValue)||oldValue==="all"
+      ?oldValue
+      :"all";
+}
+
+function renderOrders(){
+  const filterValue=
+    document.getElementById("orderDateFilter").value;
+
+  const filtered=filterValue==="all"
+    ?orders
+    :orders.filter(order=>order.date===filterValue);
+
+  const totalCost=filtered.reduce(
+    (sum,order)=>sum+(Number(order.cost)||0),0
+  );
+
+  const totalPrice=filtered.reduce(
+    (sum,order)=>sum+(Number(order.price)||0),0
+  );
+
+  const totalProfit=filtered.reduce(
+    (sum,order)=>sum+(Number(order.profit)||0),0
+  );
+
+  document.getElementById("summaryCount").textContent=
+    filtered.length;
+
+  document.getElementById("summaryCost").textContent=
+    money(totalCost);
+
+  document.getElementById("summaryPrice").textContent=
+    money(totalPrice);
+
+  document.getElementById("summaryProfit").textContent=
+    money(totalProfit);
+
+  const list=document.getElementById("orderList");
+
+  if(!filtered.length){
+    list.innerHTML=
+      '<div class="empty">暂时还没有订单记录。</div>';
+    return;
   }
 
-  function calculateProfit() {
-    const cost =
-      parseFloat(document.getElementById("orderCost").value);
-
-    const price =
-      parseFloat(document.getElementById("orderPrice").value);
-
-    const profit =
-      document.getElementById("orderProfit");
-
-    if (!isNaN(cost) && !isNaN(price)) {
-      profit.value = (price - cost).toFixed(2);
-    } else {
-      profit.value = "";
-    }
+  if(filterValue!=="all"){
+    list.innerHTML=filtered.map(orderCard).join("");
+    return;
   }
 
-  function getChannel(selectId, customId) {
-    const selected =
-      document.getElementById(selectId).value;
+  const groups={};
 
-    const custom =
-      document.getElementById(customId).value.trim();
+  filtered.forEach(order=>{
+    const date=order.date||"未设置";
+    if(!groups[date])groups[date]=[];
+    groups[date].push(order);
+  });
 
-    if (selected === "其他") {
-      return custom;
-    }
+  list.innerHTML=Object.keys(groups)
+    .sort()
+    .reverse()
+    .map(date=>{
+      const dayOrders=groups[date];
 
-    return selected;
-  }
-
-  function setChannel(selectId, customId, channel) {
-    const normalChannels = [
-      "阿冰",
-      "小四",
-      "鸿福",
-      "拍机堂"
-    ];
-
-    if (normalChannels.includes(channel)) {
-      document.getElementById(selectId).value = channel;
-      document.getElementById(customId).value = "";
-    } else if (channel) {
-      document.getElementById(selectId).value = "其他";
-      document.getElementById(customId).value = channel;
-    } else {
-      document.getElementById(selectId).value = "";
-      document.getElementById(customId).value = "";
-    }
-  }
-
-  function saveOrder() {
-    const version =
-      document.getElementById("orderVersion").value;
-
-    const capacity =
-      document.getElementById("orderCapacity").value;
-
-    const fingerprint =
-      document.getElementById("orderFingerprint").value;
-
-    const selectedChannel =
-      document.getElementById("orderChannel").value;
-
-    const channel = getChannel(
-      "orderChannel",
-      "orderCustomChannel"
-    );
-
-    const cost =
-      document.getElementById("orderCost").value;
-
-    const price =
-      document.getElementById("orderPrice").value;
-
-    if (!version || !capacity ||
-        !selectedChannel || !cost || !price) {
-      alert("请填写型号、容量、渠道、成本和售价");
-      return;
-    }
-
-    if (!version.includes("纯原") && !fingerprint) {
-      alert("请选择指纹功能");
-      return;
-    }
-
-    if (selectedChannel === "其他" && !channel) {
-      alert("请输入自定义渠道名称");
-      return;
-    }
-
-    const order = {
-      id: editingOrderId || Date.now(),
-      date:
-        document.getElementById("orderDate").value,
-      version,
-      capacity,
-      fingerprint:
-        version.includes("纯原")
-          ? "不适用"
-          : fingerprint,
-      channel,
-      trackingNumber:
-        document
-          .getElementById("trackingNumber")
-          .value
-          .trim(),
-      address:
-        document
-          .getElementById("address")
-          .value
-          .trim(),
-      cost,
-      price,
-      profit:
-        document.getElementById("orderProfit").value
-    };
-
-    if (editingOrderId) {
-      const index = orders.findIndex(
-        item => item.id === editingOrderId
+      const dayProfit=dayOrders.reduce(
+        (sum,order)=>sum+(Number(order.profit)||0),0
       );
 
-      if (index !== -1) {
-        orders[index] = order;
-      }
-    } else {
-      orders.unshift(order);
-    }
-
-    localStorage.setItem(
-      orderStorageKey,
-      JSON.stringify(orders)
-    );
-
-    resetOrderForm();
-    updateDateFilter();
-    renderOrders();
-    showPage("order-list");
-  }
-
-  function editOrder(id) {
-    const order =
-      orders.find(item => item.id === id);
-
-    if (!order) return;
-
-    editingOrderId = id;
-
-    document.getElementById("orderDate").value =
-      order.date || getToday();
-
-    document.getElementById("orderVersion").value =
-      order.version;
-
-    document.getElementById("orderCapacity").value =
-      order.capacity;
-
-    document.getElementById("orderFingerprint").value =
-      order.fingerprint === "不适用"
-        ? ""
-        : order.fingerprint;
-
-    setChannel(
-      "orderChannel",
-      "orderCustomChannel",
-      order.channel
-    );
-
-    document.getElementById("trackingNumber").value =
-      order.trackingNumber || "";
-
-    document.getElementById("address").value =
-      order.address || "";
-
-    document.getElementById("orderCost").value =
-      order.cost;
-
-    document.getElementById("orderPrice").value =
-      order.price;
-
-    checkOrderVersion();
-    checkOrderChannel();
-    calculateProfit();
-
-    document.getElementById("orderFormTitle").textContent =
-      "编辑订单";
-
-    document.getElementById("saveOrderButton").textContent =
-      "保存修改";
-
-    document.getElementById(
-      "cancelOrderButton"
-    ).style.display = "block";
-
-    showPage("new-order");
-  }
-
-  function resetOrderForm() {
-    editingOrderId = null;
-
-    document.getElementById("orderDate").value =
-      getToday();
-
-    [
-      "orderVersion",
-      "orderCapacity",
-      "orderFingerprint",
-      "orderChannel",
-      "orderCustomChannel",
-      "trackingNumber",
-      "address",
-      "orderCost",
-      "orderPrice",
-      "orderProfit"
-    ].forEach(id => {
-      document.getElementById(id).value = "";
-    });
-
-    document.getElementById("orderDate").value =
-      getToday();
-
-    document.getElementById("orderFormTitle").textContent =
-      "新增订单";
-
-    document.getElementById("saveOrderButton").textContent =
-      "保存订单";
-
-    document.getElementById(
-      "cancelOrderButton"
-    ).style.display = "none";
-
-    checkOrderVersion();
-    checkOrderChannel();
-  }
-
-  function updateDateFilter() {
-    const filter =
-      document.getElementById("orderDateFilter");
-
-    const oldValue = filter.value;
-
-    const dates = [
-      ...new Set(
-        orders
-          .map(order => order.date)
-          .filter(Boolean)
-      )
-    ].sort().reverse();
-
-    filter.innerHTML =
-      '<option value="all">全部日期</option>' +
-      dates.map(date => {
-        return `
-          <option value="${safeText(date)}">
-            ${safeText(formatDate(date))}
-          </option>
-        `;
-      }).join("");
-
-    const exists =
-      dates.includes(oldValue) || oldValue === "all";
-
-    filter.value = exists ? oldValue : "all";
-  }
-
-  function renderOrders() {
-    const filterValue =
-      document.getElementById("orderDateFilter").value;
-
-    const filteredOrders =
-      filterValue === "all"
-        ? orders
-        : orders.filter(
-            order => order.date === filterValue
-          );
-
-    const totalCost = filteredOrders.reduce(
-      (total, order) =>
-        total + (Number(order.cost) || 0),
-      0
-    );
-
-    const totalPrice = filteredOrders.reduce(
-      (total, order) =>
-        total + (Number(order.price) || 0),
-      0
-    );
-
-    const totalProfit = filteredOrders.reduce(
-      (total, order) =>
-        total + (Number(order.profit) || 0),
-      0
-    );
-
-    document.getElementById("summaryCount").textContent =
-      filteredOrders.length;
-
-    document.getElementById("summaryCost").textContent =
-      money(totalCost);
-
-    document.getElementById("summaryPrice").textContent =
-      money(totalPrice);
-
-    document.getElementById("summaryProfit").textContent =
-      money(totalProfit);
-
-    const list =
-      document.getElementById("orderList");
-
-    if (filteredOrders.length === 0) {
-      list.innerHTML =
-        '<div class="empty">暂时还没有订单记录。</div>';
-      return;
-    }
-
-    if (filterValue !== "all") {
-      list.innerHTML =
-        filteredOrders.map(orderCard).join("");
-      return;
-    }
-
-    const groupedOrders = {};
-
-    filteredOrders.forEach(order => {
-      const date = order.date || "未设置";
-
-      if (!groupedOrders[date]) {
-        groupedOrders[date] = [];
-      }
-
-      groupedOrders[date].push(order);
-    });
-
-    const sortedDates =
-      Object.keys(groupedOrders).sort().reverse();
-
-    list.innerHTML = sortedDates.map(date => {
-      const dayOrders = groupedOrders[date];
-
-      const dayProfit = dayOrders.reduce(
-        (total, order) =>
-          total + (Number(order.profit) || 0),
-        0
-      );
-
-      return `
+      return`
         <div class="date-group">
           <div class="date-heading">
             <span>
               ${safeText(
-                date === "未设置"
-                  ? "未设置日期"
-                  : formatDate(date)
+                date==="未设置"
+                  ?"未设置日期"
+                  :formatDate(date)
               )}
             </span>
 
@@ -1003,282 +989,357 @@
         </div>
       `;
     }).join("");
-  }
+}
 
-  function orderCard(order) {
-    const profitClass =
-      Number(order.profit) >= 0
-        ? "profit-positive"
-        : "profit-negative";
+function orderCard(order){
+  const fingerprint=order.fingerprint==="不适用"
+    ?""
+    :order.fingerprint||"";
 
-    const fingerprint =
-      order.fingerprint === "不适用"
-        ? ""
-        : order.fingerprint || "";
+  const profitClass=Number(order.profit)>=0
+    ?"profit-positive"
+    :"profit-negative";
 
-    return `
-      <div class="order-card">
+  return`
+    <div class="compact-card">
+      <div class="compact-top">
         <div class="item-title">
           ${safeText(order.version)}
           ${safeText(order.capacity)}
           ${safeText(fingerprint)}
         </div>
 
-        <div class="item-line">
-          日期：${safeText(formatDate(order.date))}
-        </div>
-
-        <div class="item-line">
-          渠道：${safeText(order.channel || "未填写")}
-        </div>
-
-        <div class="item-line">
-          快递单号：
-          ${safeText(order.trackingNumber || "未填写")}
-        </div>
-
-        <div class="item-line">
-          地址：${safeText(order.address || "未填写")}
-        </div>
-
-        <div class="item-line">
-          成本：${money(order.cost)}
-          ｜售价：${money(order.price)}
-        </div>
-
         <div class="${profitClass}">
-          利润：${money(order.profit)}
+          ${money(order.profit)}
         </div>
-
-        <button
-          class="edit-button"
-          onclick="editOrder(${order.id})">
-          编辑订单
-        </button>
       </div>
-    `;
+
+      <div class="meta-line">
+        ${safeText(formatDate(order.date))}
+        · ${safeText(order.channel||"未填写渠道")}
+      </div>
+
+      <div class="meta-line">
+        单号：${safeText(order.trackingNumber||"未填写")}
+      </div>
+
+      <div class="money-line">
+        成本 ${money(order.cost)}
+        · 售价 ${money(order.price)}
+      </div>
+
+      <details class="address-details">
+        <summary>查看收货地址</summary>
+        <div class="address-text">
+          ${safeText(order.address||"未填写")}
+        </div>
+      </details>
+
+      <button class="edit-button"
+        onclick="editOrder(${order.id})">
+        编辑订单
+      </button>
+    </div>
+  `;
+}
+
+function saveInventory(){
+  const version=
+    document.getElementById("inventoryVersion").value;
+
+  const capacity=
+    document.getElementById("inventoryCapacity").value;
+
+  const fingerprint=
+    document.getElementById("inventoryFingerprint").value;
+
+  const selectedChannel=
+    document.getElementById("inventoryChannel").value;
+
+  const channel=getChannel(
+    "inventoryChannel",
+    "inventoryCustomChannel"
+  );
+
+  const cost=
+    document.getElementById("inventoryCost").value;
+
+  if(!version||!capacity||!selectedChannel||!cost){
+    alert("请填写型号、容量、渠道和成本");
+    return;
   }
 
-  function saveInventory() {
-    const version =
-      document.getElementById("inventoryVersion").value;
-
-    const capacity =
-      document.getElementById("inventoryCapacity").value;
-
-    const fingerprint =
-      document.getElementById(
-        "inventoryFingerprint"
-      ).value;
-
-    const selectedChannel =
-      document.getElementById("inventoryChannel").value;
-
-    const channel = getChannel(
-      "inventoryChannel",
-      "inventoryCustomChannel"
-    );
-
-    const cost =
-      document.getElementById("inventoryCost").value;
-
-    if (!version || !capacity ||
-        !selectedChannel || !cost) {
-      alert("请填写型号、容量、渠道和成本");
-      return;
-    }
-
-    if (!version.includes("纯原") && !fingerprint) {
-      alert("请选择指纹功能");
-      return;
-    }
-
-    if (selectedChannel === "其他" && !channel) {
-      alert("请输入自定义渠道名称");
-      return;
-    }
-
-    const item = {
-      id: editingInventoryId || Date.now(),
-      version,
-      capacity,
-      fingerprint:
-        version.includes("纯原")
-          ? "不适用"
-          : fingerprint,
-      channel,
-      cost
-    };
-
-    if (editingInventoryId) {
-      const index = inventory.findIndex(
-        record => record.id === editingInventoryId
-      );
-
-      if (index !== -1) {
-        inventory[index] = item;
-      }
-    } else {
-      inventory.unshift(item);
-    }
-
-    localStorage.setItem(
-      inventoryStorageKey,
-      JSON.stringify(inventory)
-    );
-
-    resetInventoryForm();
-    renderInventory();
+  if(!version.includes("纯原")&&!fingerprint){
+    alert("请选择指纹功能");
+    return;
   }
 
-  function editInventory(id) {
-    const item =
-      inventory.find(record => record.id === id);
-
-    if (!item) return;
-
-    editingInventoryId = id;
-
-    document.getElementById("inventoryVersion").value =
-      item.version;
-
-    document.getElementById("inventoryCapacity").value =
-      item.capacity;
-
-    document.getElementById(
-      "inventoryFingerprint"
-    ).value =
-      item.fingerprint === "不适用"
-        ? ""
-        : item.fingerprint;
-
-    setChannel(
-      "inventoryChannel",
-      "inventoryCustomChannel",
-      item.channel
-    );
-
-    document.getElementById("inventoryCost").value =
-      item.cost;
-
-    checkInventoryVersion();
-    checkInventoryChannel();
-
-    document.getElementById(
-      "inventoryFormTitle"
-    ).textContent = "编辑库存";
-
-    document.getElementById(
-      "saveInventoryButton"
-    ).textContent = "保存修改";
-
-    document.getElementById(
-      "cancelInventoryButton"
-    ).style.display = "block";
-
-    document.getElementById(
-      "inventoryFormBox"
-    ).scrollIntoView({
-      behavior: "smooth"
-    });
+  if(selectedChannel==="其他"&&!channel){
+    alert("请输入自定义渠道名称");
+    return;
   }
 
-  function resetInventoryForm() {
-    editingInventoryId = null;
+  const item={
+    id:editingInventoryId||Date.now(),
+    version,
+    capacity,
+    fingerprint:version.includes("纯原")
+      ?"不适用"
+      :fingerprint,
+    channel,
+    cost
+  };
 
-    [
-      "inventoryVersion",
-      "inventoryCapacity",
-      "inventoryFingerprint",
-      "inventoryChannel",
-      "inventoryCustomChannel",
-      "inventoryCost"
-    ].forEach(id => {
-      document.getElementById(id).value = "";
-    });
-
-    document.getElementById(
-      "inventoryFormTitle"
-    ).textContent = "新增库存";
-
-    document.getElementById(
-      "saveInventoryButton"
-    ).textContent = "添加库存";
-
-    document.getElementById(
-      "cancelInventoryButton"
-    ).style.display = "none";
-
-    checkInventoryVersion();
-    checkInventoryChannel();
-  }
-
-  function renderInventory() {
-    const list =
-      document.getElementById("inventoryList");
-
-    const totalCost = inventory.reduce(
-      (total, item) =>
-        total + (Number(item.cost) || 0),
-      0
+  if(editingInventoryId){
+    const index=inventory.findIndex(
+      record=>record.id===editingInventoryId
     );
 
-    document.getElementById(
-      "inventoryCount"
-    ).textContent = inventory.length;
+    if(index!==-1)inventory[index]=item;
+  }else{
+    inventory.unshift(item);
+  }
 
-    document.getElementById(
-      "inventoryTotalCost"
-    ).textContent = money(totalCost);
+  localStorage.setItem(
+    inventoryKey,
+    JSON.stringify(inventory)
+  );
 
-    if (inventory.length === 0) {
-      list.innerHTML =
-        '<div class="empty">暂时还没有库存记录。</div>';
-      return;
-    }
+  resetInventoryForm();
+  renderInventory();
+}
 
-    list.innerHTML = inventory.map(item => {
-      const fingerprint =
-        item.fingerprint === "不适用"
-          ? ""
-          : item.fingerprint || "";
+function editInventory(id){
+  const item=inventory.find(record=>record.id===id);
+  if(!item)return;
 
-      return `
-        <div class="inventory-card">
+  editingInventoryId=id;
+
+  document.getElementById("inventoryVersion").value=
+    item.version;
+
+  document.getElementById("inventoryCapacity").value=
+    item.capacity;
+
+  document.getElementById("inventoryFingerprint").value=
+    item.fingerprint==="不适用"
+      ?""
+      :item.fingerprint;
+
+  setChannel(
+    "inventoryChannel",
+    "inventoryCustomChannel",
+    item.channel
+  );
+
+  document.getElementById("inventoryCost").value=
+    item.cost;
+
+  document.getElementById("soldOrderNumber").value="";
+
+  checkInventoryVersion();
+  checkInventoryChannel();
+
+  document.getElementById("inventoryFormTitle").textContent=
+    "编辑库存";
+
+  document.getElementById("saveInventoryButton").textContent=
+    "保存修改";
+
+  document.getElementById("cancelInventoryButton").style.display=
+    "block";
+
+  document.getElementById("soldBox").style.display=
+    "block";
+
+  document.getElementById("inventoryFormBox").scrollIntoView({
+    behavior:"smooth"
+  });
+}
+
+function markInventorySold(){
+  if(!editingInventoryId)return;
+
+  const soldOrderNumber=
+    document.getElementById("soldOrderNumber").value.trim();
+
+  if(!soldOrderNumber){
+    alert("请先填写售卖人单号");
+    return;
+  }
+
+  const item=inventory.find(
+    record=>record.id===editingInventoryId
+  );
+
+  if(!item)return;
+
+  const confirmed=confirm(
+    "确定将这个库存标记为已售出吗？"
+  );
+
+  if(!confirmed)return;
+
+  soldInventory.unshift({
+    ...item,
+    soldOrderNumber,
+    soldDate:getToday()
+  });
+
+  inventory=inventory.filter(
+    record=>record.id!==editingInventoryId
+  );
+
+  localStorage.setItem(
+    inventoryKey,
+    JSON.stringify(inventory)
+  );
+
+  localStorage.setItem(
+    soldKey,
+    JSON.stringify(soldInventory)
+  );
+
+  resetInventoryForm();
+  renderInventory();
+  renderSoldInventory();
+}
+
+function resetInventoryForm(){
+  editingInventoryId=null;
+
+  [
+    "inventoryVersion",
+    "inventoryCapacity",
+    "inventoryFingerprint",
+    "inventoryChannel",
+    "inventoryCustomChannel",
+    "inventoryCost",
+    "soldOrderNumber"
+  ].forEach(id=>{
+    document.getElementById(id).value="";
+  });
+
+  document.getElementById("inventoryFormTitle").textContent=
+    "新增库存";
+
+  document.getElementById("saveInventoryButton").textContent=
+    "添加库存";
+
+  document.getElementById("cancelInventoryButton").style.display=
+    "none";
+
+  document.getElementById("soldBox").style.display=
+    "none";
+
+  checkInventoryVersion();
+  checkInventoryChannel();
+}
+
+function renderInventory(){
+  const list=document.getElementById("inventoryList");
+
+  const totalCost=inventory.reduce(
+    (sum,item)=>sum+(Number(item.cost)||0),0
+  );
+
+  document.getElementById("inventoryCount").textContent=
+    inventory.length;
+
+  document.getElementById("inventoryTotalCost").textContent=
+    money(totalCost);
+
+  if(!inventory.length){
+    list.innerHTML=
+      '<div class="empty">暂时还没有库存记录。</div>';
+    return;
+  }
+
+  list.innerHTML=inventory.map(item=>{
+    const fingerprint=item.fingerprint==="不适用"
+      ?""
+      :item.fingerprint||"";
+
+    return`
+      <div class="inventory-card">
+        <div class="compact-top">
           <div class="item-title">
             ${safeText(item.version)}
             ${safeText(item.capacity)}
             ${safeText(fingerprint)}
           </div>
 
-          <div class="item-line">
-            渠道：${safeText(item.channel)}
-          </div>
-
-          <div class="item-line">
-            成本：${money(item.cost)}
-          </div>
-
-          <button
-            class="edit-button"
-            onclick="editInventory(${item.id})">
-            编辑库存
-          </button>
+          <strong>${money(item.cost)}</strong>
         </div>
-      `;
-    }).join("");
+
+        <div class="meta-line">
+          渠道：${safeText(item.channel)}
+        </div>
+
+        <button class="edit-button"
+          onclick="editInventory(${item.id})">
+          编辑库存 / 标记售出
+        </button>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderSoldInventory(){
+  const list=
+    document.getElementById("soldInventoryList");
+
+  if(!soldInventory.length){
+    list.innerHTML=
+      '<div class="empty">暂时还没有已售出记录。</div>';
+    return;
   }
 
-  document.getElementById("orderDate").value =
-    getToday();
+  list.innerHTML=soldInventory.map(item=>{
+    const fingerprint=item.fingerprint==="不适用"
+      ?""
+      :item.fingerprint||"";
 
-  checkOrderVersion();
-  checkOrderChannel();
-  checkInventoryVersion();
-  checkInventoryChannel();
-  updateDateFilter();
-  renderOrders();
-  renderInventory();
+    return`
+      <div class="compact-card sold-card">
+        <div class="compact-top">
+          <div class="item-title">
+            ${safeText(item.version)}
+            ${safeText(item.capacity)}
+            ${safeText(fingerprint)}
+          </div>
+
+          <strong>已售出</strong>
+        </div>
+
+        <div class="meta-line">
+          售出日期：${safeText(formatDate(item.soldDate))}
+        </div>
+
+        <div class="meta-line">
+          售卖人单号：
+          ${safeText(item.soldOrderNumber)}
+        </div>
+
+        <div class="meta-line">
+          渠道：${safeText(item.channel)}
+          · 成本：${money(item.cost)}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+document.getElementById("orderDate").value=getToday();
+
+checkOrderVersion();
+checkOrderChannel();
+checkInventoryVersion();
+checkInventoryChannel();
+updateDateFilter();
+renderOrders();
+renderInventory();
+renderSoldInventory();
 </script>
 </body>
 </html>
