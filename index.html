@@ -884,5 +884,598 @@ renderInventory();
 renderSoldInventory();
 renderAfterSales();
 </script>
+<!-- 数据备份、六位密码与 Face ID / 指纹解锁：开始 -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+#securityLock{
+  position:fixed;inset:0;z-index:9999;background:#f5f7fb;
+  display:flex;align-items:center;justify-content:center;padding:20px
+}
+.lock-card{
+  width:100%;max-width:410px;background:#fff;border-radius:20px;
+  padding:24px;box-shadow:0 14px 45px rgba(15,23,42,.16)
+}
+.lock-card h2{margin:0 0 8px;color:#2563eb}
+.lock-card p{line-height:1.6}
+.lock-card input{letter-spacing:7px;text-align:center;font-size:24px}
+.lock-card button{width:100%;margin-top:12px}
+.lock-primary{background:#2563eb;color:#fff}
+.lock-secondary{background:#eef4ff;color:#2563eb}
+.backup-note{
+  margin-top:12px;padding:11px;border-radius:9px;
+  background:#fff7ed;color:#9a3412;font-size:14px;line-height:1.55
+}
+.backup-status{
+  margin-top:12px;padding:11px;border-radius:9px;
+  background:#f0fdf4;color:#166534;font-size:14px
+}
+</style>
+
+<div id="securityLock"></div>
+
+<script>
+(function(){
+  const SECURITY_KEY="xianyuSecurityV1";
+  const BACKUP_TIME_KEY="xianyuLastBackupTime";
+
+  function el(id){return document.getElementById(id)}
+  function getData(key){
+    try{
+      const data=JSON.parse(localStorage.getItem(key)||"[]");
+      return Array.isArray(data)?data:[];
+    }catch(error){
+      return [];
+    }
+  }
+  function saveData(key,data){
+    localStorage.setItem(key,JSON.stringify(data));
+  }
+  function text(value){
+    return String(value??"").replace(/[&<>"']/g,function(char){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char];
+    });
+  }
+  function formatBackupTime(time){
+    if(!time)return"尚未备份";
+    const date=new Date(time);
+    if(isNaN(date.getTime()))return"尚未备份";
+    return date.getFullYear()+"年"+
+      (date.getMonth()+1)+"月"+
+      date.getDate()+"日 "+
+      String(date.getHours()).padStart(2,"0")+":"+
+      String(date.getMinutes()).padStart(2,"0");
+  }
+  function getSecurity(){
+    try{
+      return JSON.parse(localStorage.getItem(SECURITY_KEY)||"{}")||{};
+    }catch(error){
+      return {};
+    }
+  }
+  function saveSecurity(data){
+    localStorage.setItem(SECURITY_KEY,JSON.stringify(data));
+  }
+  async function hashPin(pin){
+    const bytes=new TextEncoder().encode(pin);
+    const digest=await crypto.subtle.digest("SHA-256",bytes);
+    return Array.from(new Uint8Array(digest))
+      .map(function(byte){return byte.toString(16).padStart(2,"0")})
+      .join("");
+  }
+  function randomBytes(length){
+    const bytes=new Uint8Array(length);
+    crypto.getRandomValues(bytes);
+    return bytes;
+  }
+  function toBase64(buffer){
+    const bytes=new Uint8Array(buffer);
+    let binary="";
+    bytes.forEach(function(byte){binary+=String.fromCharCode(byte)});
+    return btoa(binary);
+  }
+  function fromBase64(base64){
+    const binary=atob(base64);
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    return bytes;
+  }
+
+  /* 将原来的“自定义”显示成“其他”，保留原功能 */
+  const editSelect=el("editType");
+  if(editSelect){
+    Array.from(editSelect.options).forEach(function(option){
+      if(option.value==="自定义"){
+        option.textContent="其他";
+      }
+    });
+  }
+  const customEditLabel=document.querySelector('label[for="customEditReason"]');
+  if(customEditLabel)customEditLabel.textContent="其他编辑说明";
+
+  /* 增加“备份”页面 */
+  const tabs=document.querySelector(".tabs");
+  if(tabs&&!el("tab-backup")){
+    tabs.style.gridTemplateColumns="repeat(5,1fr)";
+    const button=document.createElement("button");
+    button.id="tab-backup";
+    button.className="tab-button";
+    button.textContent="备份";
+    button.onclick=function(){showPage("backup")};
+    tabs.appendChild(button);
+
+    const page=document.createElement("section");
+    page.id="page-backup";
+    page.className="page";
+    page.innerHTML=`
+      <div class="box">
+        <h2>数据备份</h2>
+        <p>导出后请在 iPhone 的下载处选择“存储到文件”，建议保存到 iCloud Drive。</p>
+
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-label">订单</div>
+            <div class="summary-value" id="backupOrderCount">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">库存</div>
+            <div class="summary-value" id="backupInventoryCount">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">已售出</div>
+            <div class="summary-value" id="backupSoldCount">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">售后</div>
+            <div class="summary-value" id="backupAfterCount">0</div>
+          </div>
+        </div>
+
+        <div class="backup-status" id="backupTime">上次备份：尚未备份</div>
+
+        <button class="primary-button" onclick="exportXianyuExcel()">
+          导出 Excel 备份
+        </button>
+
+        <label for="importExcelFile">从 Excel 恢复数据</label>
+        <input id="importExcelFile" type="file"
+          accept=".xlsx,.xls"
+          onchange="importXianyuExcel(event)">
+
+        <div class="backup-note">
+          导入会用备份文件中的订单、库存、已售出和售后记录替换当前网页数据。请先导出一份最新备份再恢复。
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>页面解锁</h2>
+        <p>六位密码只保存在当前手机浏览器。换手机或清除浏览器数据后，需要重新设置。</p>
+
+        <button class="primary-button" onclick="bindBiometric()">
+          绑定 Face ID / 指纹解锁
+        </button>
+
+        <div class="backup-note">
+          Face ID / 指纹由 iPhone 系统验证，网页不会读取你的脸部或指纹信息。
+        </div>
+
+        <button class="delete-button" onclick="changeAppPassword()">
+          修改六位密码
+        </button>
+      </div>
+    `;
+    document.querySelector("main").appendChild(page);
+  }
+
+  function renderBackupInfo(){
+    const orders=getData("xianyuOrders");
+    const inventory=getData("xianyuInventory");
+    const sold=getData("xianyuSoldInventory");
+    const afterSales=getData("xianyuAfterSales");
+
+    if(el("backupOrderCount"))el("backupOrderCount").textContent=orders.length;
+    if(el("backupInventoryCount"))el("backupInventoryCount").textContent=inventory.length;
+    if(el("backupSoldCount"))el("backupSoldCount").textContent=sold.length;
+    if(el("backupAfterCount"))el("backupAfterCount").textContent=afterSales.length;
+
+    if(el("backupTime")){
+      el("backupTime").textContent=
+        "上次备份："+formatBackupTime(localStorage.getItem(BACKUP_TIME_KEY));
+    }
+  }
+
+  window.exportXianyuExcel=function(){
+    if(!window.XLSX){
+      alert("Excel 功能正在加载，请检查网络后稍等几秒再试。");
+      return;
+    }
+
+    const orders=getData("xianyuOrders");
+    const inventory=getData("xianyuInventory");
+    const sold=getData("xianyuSoldInventory");
+    const afterSales=getData("xianyuAfterSales");
+
+    const orderRows=orders.map(function(item){
+      return {
+        "编号":item.id||"",
+        "日期":item.date||"",
+        "网络和版本":item.version||"",
+        "容量":item.capacity||"",
+        "指纹":item.fingerprint||"",
+        "渠道":item.channel||"",
+        "快递单号":item.trackingNumber||"",
+        "收货地址":item.address||"",
+        "成本":item.cost||"",
+        "售价":item.price||"",
+        "利润":item.profit||"",
+        "编辑记录":JSON.stringify(item.editHistory||[])
+      };
+    });
+
+    const inventoryRows=inventory.map(function(item){
+      return {
+        "编号":item.id||"",
+        "网络和版本":item.version||"",
+        "容量":item.capacity||"",
+        "指纹":item.fingerprint||"",
+        "渠道":item.channel||"",
+        "成本":item.cost||"",
+        "备注":item.remark||item.notes||""
+      };
+    });
+
+    const soldRows=sold.map(function(item){
+      return {
+        "编号":item.id||"",
+        "售出日期":item.soldDate||"",
+        "销售人":item.soldSeller||"",
+        "单号":item.soldOrderNumber||"",
+        "网络和版本":item.version||"",
+        "容量":item.capacity||"",
+        "指纹":item.fingerprint||"",
+        "渠道":item.channel||"",
+        "成本":item.cost||"",
+        "备注":item.remark||item.notes||""
+      };
+    });
+
+    const afterRows=afterSales.map(function(item){
+      return {
+        "售后编号":item.afterSalesId||"",
+        "原订单编号":item.id||"",
+        "售后日期":item.afterSalesDate||"",
+        "售后原因":item.afterSalesReason||"",
+        "原订单日期":item.date||"",
+        "网络和版本":item.version||"",
+        "容量":item.capacity||"",
+        "指纹":item.fingerprint||"",
+        "渠道":item.channel||"",
+        "快递单号":item.trackingNumber||"",
+        "收货地址":item.address||"",
+        "成本":item.cost||"",
+        "售价":item.price||"",
+        "利润":item.profit||""
+      };
+    });
+
+    const book=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book,XLSX.utils.json_to_sheet(orderRows),"订单明细");
+    XLSX.utils.book_append_sheet(book,XLSX.utils.json_to_sheet(inventoryRows),"库存");
+    XLSX.utils.book_append_sheet(book,XLSX.utils.json_to_sheet(soldRows),"已售出");
+    XLSX.utils.book_append_sheet(book,XLSX.utils.json_to_sheet(afterRows),"售后");
+
+    const today=new Date();
+    const filename="闲鱼数据备份_"+
+      today.getFullYear()+
+      String(today.getMonth()+1).padStart(2,"0")+
+      String(today.getDate()).padStart(2,"0")+".xlsx";
+
+    try{
+      XLSX.writeFile(book,filename);
+      localStorage.setItem(BACKUP_TIME_KEY,new Date().toISOString());
+      renderBackupInfo();
+      alert("Excel 已生成。请到 Safari 下载处选择“存储到文件”。");
+    }catch(error){
+      alert("导出失败，请稍后重试。");
+    }
+  };
+
+  function rowsFromSheet(book,name){
+    if(!book.Sheets[name])return [];
+    return XLSX.utils.sheet_to_json(book.Sheets[name],{defval:""});
+  }
+  function parseHistory(value){
+    try{
+      const data=JSON.parse(value||"[]");
+      return Array.isArray(data)?data:[];
+    }catch(error){
+      return [];
+    }
+  }
+
+  window.importXianyuExcel=function(event){
+    const file=event.target.files&&event.target.files[0];
+    if(!file)return;
+
+    if(!window.XLSX){
+      alert("Excel 功能正在加载，请检查网络后重试。");
+      event.target.value="";
+      return;
+    }
+
+    if(!confirm("导入会替换现在网页中的全部订单、库存、已售出和售后数据。确定继续吗？")){
+      event.target.value="";
+      return;
+    }
+
+    const reader=new FileReader();
+    reader.onload=function(loadEvent){
+      try{
+        const book=XLSX.read(loadEvent.target.result,{type:"array"});
+
+        const orders=rowsFromSheet(book,"订单明细").map(function(row){
+          return {
+            id:row["编号"]||Date.now()+"-"+Math.random(),
+            date:String(row["日期"]||""),
+            version:row["网络和版本"]||"",
+            capacity:String(row["容量"]||""),
+            fingerprint:row["指纹"]||"",
+            channel:row["渠道"]||"",
+            trackingNumber:String(row["快递单号"]||""),
+            address:row["收货地址"]||"",
+            cost:row["成本"]||"",
+            price:row["售价"]||"",
+            profit:row["利润"]||"",
+            editHistory:parseHistory(row["编辑记录"])
+          };
+        });
+
+        const inventory=rowsFromSheet(book,"库存").map(function(row){
+          return {
+            id:row["编号"]||Date.now()+"-"+Math.random(),
+            version:row["网络和版本"]||"",
+            capacity:String(row["容量"]||""),
+            fingerprint:row["指纹"]||"",
+            channel:row["渠道"]||"",
+            cost:row["成本"]||"",
+            remark:row["备注"]||""
+          };
+        });
+
+        const sold=rowsFromSheet(book,"已售出").map(function(row){
+          return {
+            id:row["编号"]||Date.now()+"-"+Math.random(),
+            soldDate:String(row["售出日期"]||""),
+            soldSeller:row["销售人"]||"",
+            soldOrderNumber:String(row["单号"]||""),
+            version:row["网络和版本"]||"",
+            capacity:String(row["容量"]||""),
+            fingerprint:row["指纹"]||"",
+            channel:row["渠道"]||"",
+            cost:row["成本"]||"",
+            remark:row["备注"]||""
+          };
+        });
+
+        const afterSales=rowsFromSheet(book,"售后").map(function(row){
+          return {
+            afterSalesId:row["售后编号"]||Date.now()+"-"+Math.random(),
+            id:row["原订单编号"]||"",
+            afterSalesDate:String(row["售后日期"]||""),
+            afterSalesReason:row["售后原因"]||"",
+            date:String(row["原订单日期"]||""),
+            version:row["网络和版本"]||"",
+            capacity:String(row["容量"]||""),
+            fingerprint:row["指纹"]||"",
+            channel:row["渠道"]||"",
+            trackingNumber:String(row["快递单号"]||""),
+            address:row["收货地址"]||"",
+            cost:row["成本"]||"",
+            price:row["售价"]||"",
+            profit:row["利润"]||""
+          };
+        });
+
+        saveData("xianyuOrders",orders);
+        saveData("xianyuInventory",inventory);
+        saveData("xianyuSoldInventory",sold);
+        saveData("xianyuAfterSales",afterSales);
+
+        alert("恢复成功，网页将自动刷新。");
+        location.reload();
+      }catch(error){
+        alert("导入失败。请确认选择的是本网页导出的 Excel 备份文件。");
+        event.target.value="";
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  function lockHtml(isSetup){
+    const security=getSecurity();
+    const faceButton=security.credentialId?`
+      <button id="faceUnlock" class="lock-secondary">
+        Face ID / 指纹解锁
+      </button>`:"";
+
+    return `
+      <div class="lock-card">
+        <h2>${isSetup?"设置页面密码":"闲鱼数据记录"}</h2>
+        <p>${isSetup
+          ?"请设置六位数字密码。它用于保护这台手机浏览器里的订单和地址。"
+          :"请输入六位密码后查看数据。"}
+        </p>
+
+        <input id="lockPin" type="password" inputmode="numeric"
+          maxlength="6" autocomplete="off"
+          placeholder="请输入六位密码">
+
+        ${isSetup?`
+          <input id="lockPinAgain" type="password" inputmode="numeric"
+            maxlength="6" autocomplete="off"
+            placeholder="再次输入六位密码"
+            style="margin-top:10px">
+        `:""}
+
+        <button id="pinUnlock" class="lock-primary">
+          ${isSetup?"设置密码并进入":"密码解锁"}
+        </button>
+        ${faceButton}
+
+        <p class="hint">
+          密码只保存在当前浏览器。请不要清除 Safari 网站数据。
+        </p>
+      </div>`;
+  }
+
+  function unlock(){
+    el("securityLock").style.display="none";
+    renderBackupInfo();
+  }
+
+  async function renderLock(){
+    const security=getSecurity();
+    const first=!security.pinHash;
+    el("securityLock").innerHTML=lockHtml(first);
+
+    el("pinUnlock").onclick=async function(){
+      const pin=el("lockPin").value.trim();
+
+      if(!/^\d{6}$/.test(pin)){
+        alert("请输入六位数字密码");
+        return;
+      }
+
+      if(first){
+        const again=el("lockPinAgain").value.trim();
+        if(pin!==again){
+          alert("两次密码不一致");
+          return;
+        }
+        security.pinHash=await hashPin(pin);
+        saveSecurity(security);
+        unlock();
+        return;
+      }
+
+      if(await hashPin(pin)===security.pinHash){
+        unlock();
+      }else{
+        alert("密码不正确");
+        el("lockPin").value="";
+      }
+    };
+
+    const faceButton=el("faceUnlock");
+    if(faceButton){
+      faceButton.onclick=unlockByBiometric;
+    }
+  }
+
+  async function unlockByBiometric(){
+    const security=getSecurity();
+
+    if(!security.credentialId||!navigator.credentials){
+      alert("此设备尚未绑定 Face ID / 指纹。");
+      return;
+    }
+
+    try{
+      const result=await navigator.credentials.get({
+        publicKey:{
+          challenge:randomBytes(32),
+          allowCredentials:[{
+            type:"public-key",
+            id:fromBase64(security.credentialId)
+          }],
+          userVerification:"required",
+          timeout:60000
+        }
+      });
+
+      if(toBase64(result.rawId)!==security.credentialId){
+        alert("解锁设备不匹配。");
+        return;
+      }
+
+      unlock();
+    }catch(error){
+      alert("Face ID / 指纹验证未完成，请改用六位密码解锁。");
+    }
+  }
+
+  window.bindBiometric=async function(){
+    if(!navigator.credentials||!window.PublicKeyCredential){
+      alert("当前浏览器不支持 Face ID / 指纹网页解锁。请使用 Safari 打开网页。");
+      return;
+    }
+
+    try{
+      const credential=await navigator.credentials.create({
+        publicKey:{
+          challenge:randomBytes(32),
+          rp:{name:"闲鱼数据记录"},
+          user:{
+            id:randomBytes(16),
+            name:"本机用户",
+            displayName:"本机用户"
+          },
+          pubKeyCredParams:[
+            {type:"public-key",alg:-7},
+            {type:"public-key",alg:-257}
+          ],
+          authenticatorSelection:{
+            authenticatorAttachment:"platform",
+            userVerification:"required",
+            residentKey:"preferred"
+          },
+          timeout:60000,
+          attestation:"none"
+        }
+      });
+
+      const security=getSecurity();
+      security.credentialId=toBase64(credential.rawId);
+      saveSecurity(security);
+      alert("Face ID / 指纹已绑定。下次打开网页可直接验证解锁。");
+    }catch(error){
+      alert("绑定没有完成。请确认使用 Safari，并已在 iPhone 设置中启用 Face ID 或指纹。");
+    }
+  };
+
+  window.changeAppPassword=async function(){
+    const oldPin=prompt("请输入当前六位密码");
+    if(oldPin===null)return;
+
+    const security=getSecurity();
+    if(!/^\d{6}$/.test(oldPin)||await hashPin(oldPin)!==security.pinHash){
+      alert("当前密码不正确。");
+      return;
+    }
+
+    const newPin=prompt("请输入新的六位数字密码");
+    if(newPin===null)return;
+
+    if(!/^\d{6}$/.test(newPin)){
+      alert("新密码必须是六位数字。");
+      return;
+    }
+
+    const again=prompt("请再次输入新的六位数字密码");
+    if(newPin!==again){
+      alert("两次密码不一致。");
+      return;
+    }
+
+    security.pinHash=await hashPin(newPin);
+    saveSecurity(security);
+    alert("密码修改成功。");
+  };
+
+  renderLock();
+  renderBackupInfo();
+})();
+</script>
+<!-- 数据备份、六位密码与 Face ID / 指纹解锁：结束 -->
 </body>
 </html>
