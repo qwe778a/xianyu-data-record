@@ -9,29 +9,86 @@
     main{max-width:700px;margin:auto;padding:24px 16px}
     h1{margin:0 0 8px;color:#2563eb}
     p{color:#64748b}
-    .box{background:#fff;border-radius:16px;padding:18px;margin-top:18px}
-    input{width:100%;box-sizing:border-box;padding:12px;margin:7px 0;border:1px solid #dbe2ea;border-radius:9px;font-size:16px}
-    button{width:100%;padding:13px;border:0;border-radius:9px;background:#2563eb;color:white;font-size:16px}
+    .box{background:white;border-radius:16px;padding:18px;margin-top:18px}
+    label{display:block;margin-top:14px;margin-bottom:6px;font-weight:bold}
+    input,select{
+      width:100%;box-sizing:border-box;padding:13px;
+      border:1px solid #dbe2ea;border-radius:9px;font-size:16px;
+      background:white
+    }
+    button{
+      width:100%;padding:13px;margin-top:18px;border:0;
+      border-radius:9px;background:#2563eb;color:white;font-size:16px
+    }
   </style>
 </head>
+
 <body>
-  <main>
-    <h1>闲鱼数据记录</h1>
-    <p>订单、库存、收款和售后，后面我们会慢慢加进去。</p>
-    
-    <div class="box">
-      <h2>新增订单</h2>
-      <input placeholder="商品型号">
-      <input placeholder="订单号">
-      <input placeholder="成本">
-      <input placeholder="售价">
-      <button>保存订单</button>
+<main>
+  <h1>闲鱼数据记录</h1>
+  <p>记录订单、库存、收款和售后。</p>
+
+  <div class="box">
+    <h2>新增订单</h2>
+
+    <label>网络和版本</label>
+    <select id="version" onchange="checkVersion()">
+      <option value="">请选择</option>
+      <option>Wi-Fi</option>
+      <option>无锁Wi-Fi</option>
+      <option>无锁纯原Wi-Fi</option>
+      <option>插卡</option>
+      <option>无锁插卡</option>
+      <option>无锁纯原插卡</option>
+    </select>
+
+    <label>储存容量</label>
+    <select id="capacity">
+      <option value="">请选择</option>
+      <option>32</option>
+      <option>128</option>
+    </select>
+
+    <div id="fingerprintBox">
+      <label>指纹功能</label>
+      <select id="fingerprint">
+        <option value="">请选择</option>
+        <option>无指纹</option>
+        <option>指纹</option>
+      </select>
     </div>
 
-    <div class="box">
-      <h2>我的数据</h2>
-      <p>暂时还没有订单记录。</p>
-    </div>
-  </main>
+    <label>订单号</label>
+    <input placeholder="请输入订单号">
+
+    <label>成本</label>
+    <input type="number" placeholder="请输入成本">
+
+    <label>售价</label>
+    <input type="number" placeholder="请输入售价">
+
+    <button>保存订单</button>
+  </div>
+
+  <div class="box">
+    <h2>我的数据</h2>
+    <p>暂时还没有订单记录。</p>
+  </div>
+</main>
+
+<script>
+function checkVersion() {
+  const version = document.getElementById("version").value;
+  const box = document.getElementById("fingerprintBox");
+  const fingerprint = document.getElementById("fingerprint");
+
+  if (version.includes("纯原")) {
+    box.style.display = "none";
+    fingerprint.value = "";
+  } else {
+    box.style.display = "block";
+  }
+}
+</script>
 </body>
 </html>
