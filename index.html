@@ -21,28 +21,24 @@ main{
   padding:20px 14px 50px
 }
 
-h1{
-  margin:0 0 6px;
-  color:#2563eb
-}
-
+h1{margin:0 0 6px;color:#2563eb}
 h2{margin:0 0 12px}
 p{color:#64748b}
 
 .tabs{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
   margin:18px 0
 }
 
 .tab-button{
-  padding:12px 4px;
+  padding:11px 3px;
   border:0;
   border-radius:10px;
   background:#e5e7eb;
   color:#475569;
-  font-size:15px
+  font-size:14px
 }
 
 .tab-button.active{
@@ -113,27 +109,40 @@ button{
   color:white
 }
 
-.cancel-button{
-  width:100%;
-  margin-top:9px;
-  background:#e5e7eb;
-  color:#374151;
-  display:none
-}
-
 .delete-button{
   width:100%;
+  margin-top:10px;
+  background:#fee2e2;
+  color:#dc2626
+}
+
+.small-delete-button{
+  width:100%;
+  padding:9px;
   margin-top:9px;
   background:#fee2e2;
   color:#dc2626;
-  display:none
+  font-size:14px
 }
 
-.sold-button{
-  width:100%;
-  margin-top:9px;
-  background:#fff7ed;
-  color:#ea580c
+.edit-panel{
+  display:none;
+  margin-top:17px;
+  padding:14px;
+  border:1px solid #bfdbfe;
+  border-radius:12px;
+  background:#eff6ff
+}
+
+.edit-panel h3{
+  margin:0 0 6px;
+  color:#1d4ed8
+}
+
+.delete-panel{
+  margin-top:14px;
+  padding-top:4px;
+  border-top:1px solid #fecaca
 }
 
 .sold-box{
@@ -146,6 +155,14 @@ button{
 }
 
 .sold-box label{margin-top:0}
+
+.sold-button{
+  width:100%;
+  margin-top:9px;
+  background:#fff7ed;
+  border:1px solid #fdba74;
+  color:#ea580c
+}
 
 .summary-grid{
   display:grid;
@@ -237,6 +254,15 @@ button{
   margin-top:6px
 }
 
+.edit-note{
+  margin-top:7px;
+  padding:7px 9px;
+  border-radius:8px;
+  background:#fff7ed;
+  color:#9a3412;
+  font-size:13px
+}
+
 .address-details{
   margin-top:7px;
   color:#64748b;
@@ -276,6 +302,16 @@ button{
   background:#fffbeb
 }
 
+.after-card{
+  border-left:4px solid #ef4444;
+  background:#fff7f7
+}
+
+.search-input{
+  margin-top:12px;
+  background:#f8fafc
+}
+
 .empty{
   color:#64748b;
   text-align:center;
@@ -287,7 +323,7 @@ button{
 <body>
 <main>
   <h1>闲鱼数据记录</h1>
-  <p>订单和库存管理</p>
+  <p>订单、库存和售后管理</p>
 
   <div class="tabs">
     <button id="tab-new-order"
@@ -307,9 +343,15 @@ button{
       onclick="showPage('inventory')">
       库存
     </button>
+
+    <button id="tab-after-sales"
+      class="tab-button"
+      onclick="showPage('after-sales')">
+      售后
+    </button>
   </div>
 
-  <!-- 新增订单 -->
+  <!-- 新增及编辑订单 -->
   <section id="page-new-order" class="page active">
     <div class="box" id="orderFormBox">
       <h2 id="orderFormTitle">新增订单</h2>
@@ -398,22 +440,48 @@ button{
         placeholder="自动计算"
         readonly>
 
+      <div id="orderEditPanel" class="edit-panel">
+        <h3>本次编辑类型</h3>
+
+        <label>选择编辑类型</label>
+        <select id="editType" onchange="checkEditType()">
+          <option value="">请选择</option>
+          <option value="换货">换货</option>
+          <option value="自定义">自定义</option>
+        </select>
+
+        <div id="customEditBox" class="hidden">
+          <label>自定义编辑说明</label>
+          <input id="customEditReason"
+            placeholder="请输入本次修改的原因">
+        </div>
+
+        <div class="delete-panel">
+          <label>删除原因</label>
+          <select id="deleteReason"
+            onchange="checkDeleteReason()">
+            <option value="">请选择</option>
+            <option value="退货">退货</option>
+            <option value="其他">其他</option>
+          </select>
+
+          <div id="customDeleteBox" class="hidden">
+            <label>其他删除原因</label>
+            <input id="customDeleteReason"
+              placeholder="请输入删除原因">
+          </div>
+
+          <button class="delete-button"
+            onclick="deleteOrder()">
+            删除订单并转到售后
+          </button>
+        </div>
+      </div>
+
       <button id="saveOrderButton"
         class="primary-button"
         onclick="saveOrder()">
         保存订单
-      </button>
-
-      <button id="cancelOrderButton"
-        class="cancel-button"
-        onclick="resetOrderForm()">
-        取消编辑
-      </button>
-
-      <button id="deleteOrderButton"
-        class="delete-button"
-        onclick="deleteOrder()">
-        删除订单
       </button>
     </div>
   </section>
@@ -422,6 +490,12 @@ button{
   <section id="page-order-list" class="page">
     <div class="box">
       <h2>订单明细</h2>
+
+      <label>搜索订单</label>
+      <input id="orderSearch"
+        class="search-input"
+        placeholder="搜索型号、单号、地址、渠道等"
+        oninput="renderOrders()">
 
       <label>选择日期</label>
       <select id="orderDateFilter"
@@ -521,12 +595,6 @@ button{
         添加库存
       </button>
 
-      <button id="cancelInventoryButton"
-        class="cancel-button"
-        onclick="resetInventoryForm()">
-        取消编辑
-      </button>
-
       <div id="soldBox" class="sold-box">
         <label>售卖人单号</label>
         <input id="soldOrderNumber"
@@ -550,7 +618,8 @@ button{
 
         <div class="summary-card">
           <div class="summary-label">库存总成本</div>
-          <div class="summary-value" id="inventoryTotalCost">¥0.00</div>
+          <div class="summary-value"
+            id="inventoryTotalCost">¥0.00</div>
         </div>
       </div>
 
@@ -562,27 +631,46 @@ button{
       <div id="soldInventoryList"></div>
     </div>
   </section>
+
+  <!-- 售后 -->
+  <section id="page-after-sales" class="page">
+    <div class="box">
+      <h2>售后</h2>
+
+      <div class="summary-card">
+        <div class="summary-label">售后记录数量</div>
+        <div class="summary-value" id="afterSalesCount">0</div>
+      </div>
+
+      <div id="afterSalesList"></div>
+    </div>
+  </section>
 </main>
 
 <script>
 const orderKey="xianyuOrders";
 const inventoryKey="xianyuInventory";
 const soldKey="xianyuSoldInventory";
+const afterSalesKey="xianyuAfterSales";
 
 let editingOrderId=null;
 let editingInventoryId=null;
+
 let orders=[];
 let inventory=[];
 let soldInventory=[];
+let afterSales=[];
 
 try{
   orders=JSON.parse(localStorage.getItem(orderKey))||[];
   inventory=JSON.parse(localStorage.getItem(inventoryKey))||[];
   soldInventory=JSON.parse(localStorage.getItem(soldKey))||[];
+  afterSales=JSON.parse(localStorage.getItem(afterSalesKey))||[];
 }catch{
   orders=[];
   inventory=[];
   soldInventory=[];
+  afterSales=[];
 }
 
 function showPage(name){
@@ -610,8 +698,13 @@ function getToday(){
 
 function formatDate(date){
   if(!date)return"未设置日期";
+
   const parts=date.split("-");
-  return Number(parts[1])+"月"+Number(parts[2])+"日";
+
+  return Number(parts[1])+
+    "月"+
+    Number(parts[2])+
+    "日";
 }
 
 function money(value){
@@ -628,9 +721,14 @@ function safeText(value){
 }
 
 function checkOrderVersion(){
-  const version=document.getElementById("orderVersion").value;
-  const field=document.getElementById("orderFingerprintField");
-  const row=document.getElementById("orderOptionRow");
+  const version=
+    document.getElementById("orderVersion").value;
+
+  const field=
+    document.getElementById("orderFingerprintField");
+
+  const row=
+    document.getElementById("orderOptionRow");
 
   if(version.includes("纯原")){
     field.style.display="none";
@@ -643,9 +741,14 @@ function checkOrderVersion(){
 }
 
 function checkInventoryVersion(){
-  const version=document.getElementById("inventoryVersion").value;
-  const field=document.getElementById("inventoryFingerprintField");
-  const row=document.getElementById("inventoryOptionRow");
+  const version=
+    document.getElementById("inventoryVersion").value;
+
+  const field=
+    document.getElementById("inventoryFingerprintField");
+
+  const row=
+    document.getElementById("inventoryOptionRow");
 
   if(version.includes("纯原")){
     field.style.display="none";
@@ -658,8 +761,11 @@ function checkInventoryVersion(){
 }
 
 function checkOrderChannel(){
-  const channel=document.getElementById("orderChannel").value;
-  const box=document.getElementById("orderCustomChannelBox");
+  const channel=
+    document.getElementById("orderChannel").value;
+
+  const box=
+    document.getElementById("orderCustomChannelBox");
 
   box.classList.toggle("hidden",channel!=="其他");
 
@@ -669,13 +775,38 @@ function checkOrderChannel(){
 }
 
 function checkInventoryChannel(){
-  const channel=document.getElementById("inventoryChannel").value;
-  const box=document.getElementById("inventoryCustomChannelBox");
+  const channel=
+    document.getElementById("inventoryChannel").value;
+
+  const box=
+    document.getElementById("inventoryCustomChannelBox");
 
   box.classList.toggle("hidden",channel!=="其他");
 
   if(channel!=="其他"){
     document.getElementById("inventoryCustomChannel").value="";
+  }
+}
+
+function checkEditType(){
+  const type=document.getElementById("editType").value;
+
+  document.getElementById("customEditBox")
+    .classList.toggle("hidden",type!=="自定义");
+
+  if(type!=="自定义"){
+    document.getElementById("customEditReason").value="";
+  }
+}
+
+function checkDeleteReason(){
+  const reason=document.getElementById("deleteReason").value;
+
+  document.getElementById("customDeleteBox")
+    .classList.toggle("hidden",reason!=="其他");
+
+  if(reason!=="其他"){
+    document.getElementById("customDeleteReason").value="";
   }
 }
 
@@ -697,6 +828,7 @@ function calculateProfit(){
 function getChannel(selectId,customId){
   const selected=document.getElementById(selectId).value;
   const custom=document.getElementById(customId).value.trim();
+
   return selected==="其他"?custom:selected;
 }
 
@@ -716,13 +848,28 @@ function setChannel(selectId,customId,channel){
 }
 
 function saveOrder(){
-  const version=document.getElementById("orderVersion").value;
-  const capacity=document.getElementById("orderCapacity").value;
-  const fingerprint=document.getElementById("orderFingerprint").value;
-  const selectedChannel=document.getElementById("orderChannel").value;
-  const channel=getChannel("orderChannel","orderCustomChannel");
-  const cost=document.getElementById("orderCost").value;
-  const price=document.getElementById("orderPrice").value;
+  const version=
+    document.getElementById("orderVersion").value;
+
+  const capacity=
+    document.getElementById("orderCapacity").value;
+
+  const fingerprint=
+    document.getElementById("orderFingerprint").value;
+
+  const selectedChannel=
+    document.getElementById("orderChannel").value;
+
+  const channel=getChannel(
+    "orderChannel",
+    "orderCustomChannel"
+  );
+
+  const cost=
+    document.getElementById("orderCost").value;
+
+  const price=
+    document.getElementById("orderPrice").value;
 
   if(!version||!capacity||!selectedChannel||!cost||!price){
     alert("请填写型号、容量、渠道、成本和售价");
@@ -737,6 +884,42 @@ function saveOrder(){
   if(selectedChannel==="其他"&&!channel){
     alert("请输入自定义渠道名称");
     return;
+  }
+
+  let editHistory=[];
+
+  if(editingOrderId){
+    const editType=
+      document.getElementById("editType").value;
+
+    const customEditReason=
+      document.getElementById("customEditReason").value.trim();
+
+    if(!editType){
+      alert("请选择本次编辑类型：换货或自定义");
+      return;
+    }
+
+    if(editType==="自定义"&&!customEditReason){
+      alert("请输入自定义编辑说明");
+      return;
+    }
+
+    const oldOrder=orders.find(
+      item=>item.id===editingOrderId
+    );
+
+    editHistory=oldOrder&&oldOrder.editHistory
+      ?oldOrder.editHistory
+      :[];
+
+    editHistory.push({
+      date:getToday(),
+      type:editType,
+      reason:editType==="自定义"
+        ?customEditReason
+        :"换货"
+    });
   }
 
   const order={
@@ -755,7 +938,8 @@ function saveOrder(){
     cost,
     price,
     profit:
-      document.getElementById("orderProfit").value
+      document.getElementById("orderProfit").value,
+    editHistory
   };
 
   if(editingOrderId){
@@ -763,7 +947,9 @@ function saveOrder(){
       item=>item.id===editingOrderId
     );
 
-    if(index!==-1)orders[index]=order;
+    if(index!==-1){
+      orders[index]=order;
+    }
   }else{
     orders.unshift(order);
   }
@@ -814,20 +1000,24 @@ function editOrder(id){
   document.getElementById("orderPrice").value=
     order.price;
 
+  document.getElementById("editType").value="";
+  document.getElementById("customEditReason").value="";
+  document.getElementById("deleteReason").value="";
+  document.getElementById("customDeleteReason").value="";
+
   checkOrderVersion();
   checkOrderChannel();
+  checkEditType();
+  checkDeleteReason();
   calculateProfit();
 
   document.getElementById("orderFormTitle").textContent=
     "编辑订单";
 
   document.getElementById("saveOrderButton").textContent=
-    "保存修改";
+    "保存编辑";
 
-  document.getElementById("cancelOrderButton").style.display=
-    "block";
-
-  document.getElementById("deleteOrderButton").style.display=
+  document.getElementById("orderEditPanel").style.display=
     "block";
 
   showPage("new-order");
@@ -836,22 +1026,58 @@ function editOrder(id){
 function deleteOrder(){
   if(!editingOrderId)return;
 
+  const selectedReason=
+    document.getElementById("deleteReason").value;
+
+  const customReason=
+    document.getElementById("customDeleteReason").value.trim();
+
+  if(!selectedReason){
+    alert("请先选择删除原因");
+    return;
+  }
+
+  if(selectedReason==="其他"&&!customReason){
+    alert("请输入自定义删除原因");
+    return;
+  }
+
+  const order=orders.find(
+    item=>item.id===editingOrderId
+  );
+
+  if(!order)return;
+
   const confirmed=confirm(
-    "确定删除这个订单吗？删除后无法恢复。"
+    "确定将这个订单移到售后页面吗？"
   );
 
   if(!confirmed)return;
 
+  afterSales.unshift({
+    ...order,
+    afterSalesDate:getToday(),
+    afterSalesReason:selectedReason==="其他"
+      ?customReason
+      :"退货"
+  });
+
   orders=orders.filter(
-    order=>order.id!==editingOrderId
+    item=>item.id!==editingOrderId
   );
 
   localStorage.setItem(orderKey,JSON.stringify(orders));
 
+  localStorage.setItem(
+    afterSalesKey,
+    JSON.stringify(afterSales)
+  );
+
   resetOrderForm();
   updateDateFilter();
   renderOrders();
-  showPage("order-list");
+  renderAfterSales();
+  showPage("after-sales");
 }
 
 function resetOrderForm(){
@@ -867,23 +1093,36 @@ function resetOrderForm(){
     "address",
     "orderCost",
     "orderPrice",
-    "orderProfit"
+    "orderProfit",
+    "editType",
+    "customEditReason",
+    "deleteReason",
+    "customDeleteReason"
   ].forEach(id=>{
     document.getElementById(id).value="";
   });
 
   document.getElementById("orderDate").value=getToday();
-  document.getElementById("orderFormTitle").textContent="新增订单";
-  document.getElementById("saveOrderButton").textContent="保存订单";
-  document.getElementById("cancelOrderButton").style.display="none";
-  document.getElementById("deleteOrderButton").style.display="none";
+
+  document.getElementById("orderFormTitle").textContent=
+    "新增订单";
+
+  document.getElementById("saveOrderButton").textContent=
+    "保存订单";
+
+  document.getElementById("orderEditPanel").style.display=
+    "none";
 
   checkOrderVersion();
   checkOrderChannel();
+  checkEditType();
+  checkDeleteReason();
 }
 
 function updateDateFilter(){
-  const filter=document.getElementById("orderDateFilter");
+  const filter=
+    document.getElementById("orderDateFilter");
+
   const oldValue=filter.value;
 
   const dates=[
@@ -906,13 +1145,49 @@ function updateDateFilter(){
       :"all";
 }
 
+function orderMatchesSearch(order,search){
+  if(!search)return true;
+
+  const latestEdit=
+    order.editHistory&&order.editHistory.length
+      ?order.editHistory[order.editHistory.length-1]
+      :null;
+
+  const text=[
+    order.date,
+    formatDate(order.date),
+    order.version,
+    order.capacity,
+    order.fingerprint,
+    order.channel,
+    order.trackingNumber,
+    order.address,
+    order.cost,
+    order.price,
+    order.profit,
+    latestEdit?latestEdit.reason:""
+  ].join(" ").toLowerCase();
+
+  return text.includes(search);
+}
+
 function renderOrders(){
   const filterValue=
     document.getElementById("orderDateFilter").value;
 
-  const filtered=filterValue==="all"
-    ?orders
-    :orders.filter(order=>order.date===filterValue);
+  const search=
+    document.getElementById("orderSearch")
+      .value
+      .trim()
+      .toLowerCase();
+
+  const filtered=orders.filter(order=>{
+    const matchesDate=
+      filterValue==="all"||
+      order.date===filterValue;
+
+    return matchesDate&&orderMatchesSearch(order,search);
+  });
 
   const totalCost=filtered.reduce(
     (sum,order)=>sum+(Number(order.cost)||0),0
@@ -942,7 +1217,7 @@ function renderOrders(){
 
   if(!filtered.length){
     list.innerHTML=
-      '<div class="empty">暂时还没有订单记录。</div>';
+      '<div class="empty">没有找到符合条件的订单。</div>';
     return;
   }
 
@@ -955,7 +1230,11 @@ function renderOrders(){
 
   filtered.forEach(order=>{
     const date=order.date||"未设置";
-    if(!groups[date])groups[date]=[];
+
+    if(!groups[date]){
+      groups[date]=[];
+    }
+
     groups[date].push(order);
   });
 
@@ -1000,6 +1279,21 @@ function orderCard(order){
     ?"profit-positive"
     :"profit-negative";
 
+  let editNote="";
+
+  if(order.editHistory&&order.editHistory.length){
+    const latest=
+      order.editHistory[order.editHistory.length-1];
+
+    editNote=`
+      <div class="edit-note">
+        最近编辑：
+        ${safeText(latest.type)}
+        · ${safeText(latest.reason)}
+      </div>
+    `;
+  }
+
   return`
     <div class="compact-card">
       <div class="compact-top">
@@ -1027,6 +1321,8 @@ function orderCard(order){
         成本 ${money(order.cost)}
         · 售价 ${money(order.price)}
       </div>
+
+      ${editNote}
 
       <details class="address-details">
         <summary>查看收货地址</summary>
@@ -1095,7 +1391,9 @@ function saveInventory(){
       record=>record.id===editingInventoryId
     );
 
-    if(index!==-1)inventory[index]=item;
+    if(index!==-1){
+      inventory[index]=item;
+    }
   }else{
     inventory.unshift(item);
   }
@@ -1145,9 +1443,6 @@ function editInventory(id){
 
   document.getElementById("saveInventoryButton").textContent=
     "保存修改";
-
-  document.getElementById("cancelInventoryButton").style.display=
-    "block";
 
   document.getElementById("soldBox").style.display=
     "block";
@@ -1205,6 +1500,25 @@ function markInventorySold(){
   renderSoldInventory();
 }
 
+function deleteSoldInventory(id){
+  const confirmed=confirm(
+    "确定永久删除这条已售出记录吗？"
+  );
+
+  if(!confirmed)return;
+
+  soldInventory=soldInventory.filter(
+    item=>item.id!==id
+  );
+
+  localStorage.setItem(
+    soldKey,
+    JSON.stringify(soldInventory)
+  );
+
+  renderSoldInventory();
+}
+
 function resetInventoryForm(){
   editingInventoryId=null;
 
@@ -1225,9 +1539,6 @@ function resetInventoryForm(){
 
   document.getElementById("saveInventoryButton").textContent=
     "添加库存";
-
-  document.getElementById("cancelInventoryButton").style.display=
-    "none";
 
   document.getElementById("soldBox").style.display=
     "none";
@@ -1325,6 +1636,77 @@ function renderSoldInventory(){
           渠道：${safeText(item.channel)}
           · 成本：${money(item.cost)}
         </div>
+
+        <button class="small-delete-button"
+          onclick="deleteSoldInventory(${item.id})">
+          删除已售出记录
+        </button>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderAfterSales(){
+  const list=
+    document.getElementById("afterSalesList");
+
+  document.getElementById("afterSalesCount").textContent=
+    afterSales.length;
+
+  if(!afterSales.length){
+    list.innerHTML=
+      '<div class="empty">暂时还没有售后记录。</div>';
+    return;
+  }
+
+  list.innerHTML=afterSales.map(order=>{
+    const fingerprint=order.fingerprint==="不适用"
+      ?""
+      :order.fingerprint||"";
+
+    return`
+      <div class="compact-card after-card">
+        <div class="compact-top">
+          <div class="item-title">
+            ${safeText(order.version)}
+            ${safeText(order.capacity)}
+            ${safeText(fingerprint)}
+          </div>
+
+          <strong>${safeText(order.afterSalesReason)}</strong>
+        </div>
+
+        <div class="meta-line">
+          售后日期：
+          ${safeText(formatDate(order.afterSalesDate))}
+        </div>
+
+        <div class="meta-line">
+          原订单日期：
+          ${safeText(formatDate(order.date))}
+        </div>
+
+        <div class="meta-line">
+          渠道：${safeText(order.channel||"未填写")}
+        </div>
+
+        <div class="meta-line">
+          快递单号：
+          ${safeText(order.trackingNumber||"未填写")}
+        </div>
+
+        <div class="money-line">
+          成本 ${money(order.cost)}
+          · 售价 ${money(order.price)}
+          · 利润 ${money(order.profit)}
+        </div>
+
+        <details class="address-details">
+          <summary>查看收货地址</summary>
+          <div class="address-text">
+            ${safeText(order.address||"未填写")}
+          </div>
+        </details>
       </div>
     `;
   }).join("");
@@ -1336,10 +1718,14 @@ checkOrderVersion();
 checkOrderChannel();
 checkInventoryVersion();
 checkInventoryChannel();
+checkEditType();
+checkDeleteReason();
+
 updateDateFilter();
 renderOrders();
 renderInventory();
 renderSoldInventory();
+renderAfterSales();
 </script>
 </body>
 </html>
