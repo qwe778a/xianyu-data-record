@@ -1477,5 +1477,256 @@ renderAfterSales();
 })();
 </script>
 <!-- 数据备份、六位密码与 Face ID / 指纹解锁：结束 -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+(function(){
+  const tabBox=document.querySelector('.tabs');
+  if(!tabBox||document.getElementById('tab-import-orders'))return;
+
+  tabBox.style.gridTemplateColumns='repeat(3,1fr)';
+
+  const tab=document.createElement('button');
+  tab.id='tab-import-orders';
+  tab.className='tab-button';
+  tab.textContent='数据导入';
+  tab.onclick=function(){showPage('import-orders')};
+  tabBox.appendChild(tab);
+
+  const page=document.createElement('section');
+  page.id='page-import-orders';
+  page.className='page';
+  page.innerHTML=`
+    <div class="box">
+      <h2>订单数据导入</h2>
+      <p>选择 Excel 后，会自动生成订单并追加到订单明细，不会删除原有订单。</p>
+
+      <label>导入订单日期</label>
+      <input id="importOrderDate" type="date">
+
+      <label>选择 Excel 文件</label>
+      <input id="importOrderFile" type="file" accept=".xlsx,.xls"
+        onchange="readImportOrders(event)">
+
+      <div id="importOrderInfo" class="empty">还没有选择文件。</div>
+
+      <button class="primary-button" onclick="saveImportedOrders()">
+        生成并导入订单
+      </button>
+    </div>
+  `;
+  document.querySelector('main').appendChild(page);
+
+  const now=new Date();
+  document.getElementById('importOrderDate').value=
+    now.getFullYear()+'-'+
+    String(now.getMonth()+1).padStart(2,'0')+'-'+
+    String(now.getDate()).padStart(2,'0');
+
+  let pending=[];
+
+  function modelInfo(raw){
+    raw=String(raw||'').trim();
+
+    let version='未识别';
+
+    if(raw.includes('无锁')&&raw.includes('纯原')&&raw.includes('插卡')){
+      version='无锁纯原插卡';
+    }else if(raw.includes('无锁')&&raw.includes('纯原')){
+      version='无锁纯原Wi-Fi';
+    }else if(raw.includes('无锁')&&raw.includes('插卡')){
+      version='无锁插卡';
+    }else if(raw.includes('无锁')){
+      version='无锁Wi-Fi';
+    }else if(raw.includes('插卡')){
+      version='插卡';
+    }else if(raw.includes('Wi-Fi')){
+      version='Wi-Fi';
+    }
+
+    const capacity=['256','128','64','32'].find(function(v){
+      return raw.includes(v);
+    })||'';
+
+    let fingerprint=raw.includes('无指纹')
+      ?'无指纹'
+      :(raw.includes('指纹')?'指纹':'');
+
+    if(version.includes('纯原')){
+      fingerprint='不适用';
+    }
+
+    return{
+      version:version,
+      capacity:capacity,
+      fingerprint:fingerprint,
+      raw:raw
+    };
+  }
+
+  function text(v){
+    return String(v??'').trim();
+  }
+
+  function number(v){
+    const n=Number(v);
+    return Number.isFinite(n)?n:0;
+  }
+
+  function history(v){
+    try{
+      const result=JSON.parse(v);
+      return Array.isArray(result)?result:[];
+    }catch(e){
+      return [];
+    }
+  }
+
+  window.readImportOrders=function(event){
+    const file=event.target.files&&event.target.files[0];
+
+    if(!file)return;
+
+    if(!window.XLSX){
+      alert('Excel 功能正在加载，请等几秒后重新选择文件。');
+      return;
+    }
+
+    const reader=new FileReader();
+
+    reader.onload=function(e){
+      try{
+        const book=XLSX.read(e.target.result,{type:'array'});
+
+        const sheet=
+          book.Sheets['订单明细']||
+          book.Sheets[book.SheetNames[0]];
+
+        const rows=XLSX.utils.sheet_to_json(sheet,{
+          header:1,
+          defval:''
+        });
+
+        const isBackup=rows[0]&&rows[0].includes('网络和版本');
+
+        pending=[];
+
+        if(isBackup){
+          const heads=rows[0];
+
+          rows.slice(1).forEach(function(row){
+            const data={};
+
+            heads.forEach(function(head,i){
+              data[head]=row[i];
+            });
+
+            if(!text(data['网络和版本'])&&!text(data['原始商品信息'])){
+              return;
+            }
+
+            const cost=number(data['成本']);
+            const price=number(data['售价']);
+
+            pending.push({
+              date:text(data['日期']),
+              version:text(data['网络和版本'])||'未识别',
+              capacity:text(data['容量']),
+              fingerprint:text(data['指纹'])||'',
+              channel:text(data['渠道'])||'无货源',
+              trackingNumber:text(data['快递单号']),
+              address:text(data['收货地址']),
+              cost:cost,
+              price:price,
+              profit:(price-cost).toFixed(2),
+              editHistory:history(data['编辑记录']),
+              originalProduct:text(data['原始商品信息'])
+            });
+          });
+        }else{
+          rows.forEach(function(row){
+            if(!text(row[0]))return;
+
+            const info=modelInfo(row[0]);
+            const cost=number(row[2]);
+            const price=number(row[3]);
+
+            pending.push({
+              date:'',
+              version:info.version,
+              capacity:info.capacity,
+              fingerprint:info.fingerprint,
+              channel:'无货源',
+              trackingNumber:text(row[1]),
+              address:text(row[5]),
+              cost:cost,
+              price:price,
+              profit:(price-cost).toFixed(2),
+              editHistory:[],
+              originalProduct:info.raw
+            });
+          });
+        }
+
+        document.getElementById('importOrderInfo').textContent=
+          '已读取 '+pending.length+' 条订单，确认后会生成并导入。';
+
+      }catch(error){
+        pending=[];
+        document.getElementById('importOrderInfo').textContent=
+          '读取失败，请选择 Excel 文件。';
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+  window.saveImportedOrders=function(){
+    if(!pending.length){
+      alert('请先选择包含订单数据的 Excel 文件。');
+      return;
+    }
+
+    const date=document.getElementById('importOrderDate').value;
+
+    if(!date){
+      alert('请选择导入日期。');
+      return;
+    }
+
+    if(!confirm('确定生成 '+pending.length+' 条订单吗？它们会追加到现有订单明细。')){
+      return;
+    }
+
+    let existing=[];
+
+    try{
+      existing=JSON.parse(localStorage.getItem('xianyuOrders')||'[]');
+
+      if(!Array.isArray(existing)){
+        existing=[];
+      }
+    }catch(e){
+      existing=[];
+    }
+
+    const imported=pending.map(function(item,index){
+      return Object.assign({},item,{
+        id:'import-'+Date.now()+'-'+index,
+        date:item.date||date
+      });
+    });
+
+    localStorage.setItem(
+      'xianyuOrders',
+      JSON.stringify(imported.concat(existing))
+    );
+
+    alert('已生成 '+imported.length+' 条订单，网页将自动刷新。');
+
+    location.reload();
+  };
+})();
+</script>
 </body>
 </html>
