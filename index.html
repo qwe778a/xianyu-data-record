@@ -2147,4 +2147,754 @@ renderAfterSales();
 })();
 </script>
 </body>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+.workspace-switch{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin:0 0 18px;
+}
+.workspace-switch button{
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  background:#e5e7eb;
+  color:#475569;
+  font-size:16px;
+  font-weight:bold;
+}
+.workspace-switch button.active{
+  background:#2563eb;
+  color:#fff;
+}
+#dysonApp{display:none}
+body.dyson-mode main>:not(.workspace-switch):not(#dysonApp){
+  display:none!important;
+}
+body.dyson-mode #dysonApp{display:block}
+#tab-dyson,#page-dyson{display:none!important}
+
+.dy-tabs{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin:18px 0;
+}
+.dy-tabs button{
+  padding:11px 4px;
+  border:0;
+  border-radius:10px;
+  background:#e5e7eb;
+  color:#475569;
+  font-size:14px;
+}
+.dy-tabs button.active{
+  background:#2563eb;
+  color:#fff;
+}
+.dy-page{display:none}
+.dy-page.active{display:block}
+.dy-card{
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:12px;
+  padding:12px;
+  margin-top:10px;
+}
+.dy-top{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  align-items:flex-start;
+}
+.dy-title{font-weight:bold;font-size:17px}
+.dy-meta{
+  color:#64748b;
+  font-size:14px;
+  margin-top:7px;
+  word-break:break-all;
+  line-height:1.45;
+}
+.dy-green{color:#16a34a;font-weight:bold}
+.dy-red{color:#dc2626;font-weight:bold}
+.dy-edit{
+  width:100%;
+  margin-top:10px;
+  padding:9px;
+  border:0;
+  border-radius:9px;
+  background:#eef4ff;
+  color:#2563eb;
+}
+.dy-danger{
+  width:100%;
+  margin-top:10px;
+  padding:10px;
+  border:0;
+  border-radius:9px;
+  background:#fee2e2;
+  color:#dc2626;
+}
+.dy-warn{
+  border-left:4px solid #f59e0b;
+  background:#fffbeb;
+}
+.dy-after{
+  border-left:4px solid #ef4444;
+  background:#fff7f7;
+}
+.dy-search-wrap{position:relative}
+.dy-search-wrap span{
+  position:absolute;
+  left:13px;
+  top:12px;
+  color:#64748b;
+  font-size:19px;
+}
+.dy-search-wrap input{padding-left:41px}
+.dy-group-title{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid #dbe2ea;
+  padding:14px 2px 7px;
+  font-weight:bold;
+}
+</style>
+
+<script>
+(function(){
+  const main=document.querySelector("main");
+  if(!main || document.getElementById("dysonAppV2")) return;
+
+  const keys={
+    orders:"dysonV2Orders",
+    inventory:"dysonV2Inventory",
+    sold:"dysonV2Sold",
+    after:"dysonV2AfterSales"
+  };
+
+  function read(key){
+    try{return JSON.parse(localStorage.getItem(key))||[]}
+    catch(e){return[]}
+  }
+  function save(key,data){
+    localStorage.setItem(key,JSON.stringify(data));
+  }
+  function esc(v){
+    return String(v||"")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+  function today(){
+    const d=new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+  function dateText(v){
+    if(!v)return"未设置";
+    const a=v.split("-");
+    return Number(a[1])+"月"+Number(a[2])+"日";
+  }
+  function money(v){return "¥"+(Number(v)||0).toFixed(2)}
+  function id(){return "dy-"+Date.now()+"-"+Math.random().toString(16).slice(2)}
+
+  let orders=read(keys.orders);
+  let inventory=read(keys.inventory);
+  let sold=read(keys.sold);
+  let after=read(keys.after);
+  let editingOrder=null;
+  let editingInventory=null;
+
+  /* 把你旧版戴森订单自动复制到新的独立戴森数据中，只执行一次 */
+  if(!orders.length && localStorage.getItem("dysonOrders")){
+    const old=read("dysonOrders");
+    if(old.length){
+      orders=old.map(x=>({
+        id:id(),
+        date:x.date||today(),
+        model:(x.model||x.version||"HD08").toUpperCase(),
+        tracking:x.tracking||x.trackingNumber||"",
+        address:x.address||"",
+        cost:x.cost||"",
+        price:x.price||"",
+        profit:x.profit||((Number(x.price)||0)-(Number(x.cost)||0)).toFixed(2),
+        note:x.note||"",
+        history:[]
+      }));
+      save(keys.orders,orders);
+    }
+  }
+
+  const switcher=document.createElement("div");
+  switcher.className="workspace-switch";
+  switcher.innerHTML=`
+    <button id="switch7plus" class="active" onclick="DysonApp.workspace('seven')">7plus</button>
+    <button id="switchDyson" onclick="DysonApp.workspace('dyson')">戴森</button>
+  `;
+  main.insertBefore(switcher,main.firstChild);
+
+  const app=document.createElement("section");
+  app.id="dysonAppV2";
+  app.innerHTML=`
+    <h1>戴森数据</h1>
+    <p>戴森订单、库存、售后、备份和数据导入</p>
+
+    <div class="dy-tabs">
+      <button id="dy-tab-new" class="active" onclick="DysonApp.page('new')">新增订单</button>
+      <button id="dy-tab-list" onclick="DysonApp.page('list')">订单明细</button>
+      <button id="dy-tab-stock" onclick="DysonApp.page('stock')">库存</button>
+      <button id="dy-tab-after" onclick="DysonApp.page('after')">售后</button>
+      <button id="dy-tab-backup" onclick="DysonApp.page('backup')">备份</button>
+      <button id="dy-tab-import" onclick="DysonApp.page('import')">数据导入</button>
+    </div>
+
+    <section id="dy-page-new" class="dy-page active">
+      <div class="box">
+        <h2 id="dyOrderTitle">新增戴森订单</h2>
+
+        <label>日期</label>
+        <input id="dyDate" type="date">
+
+        <label>戴森型号</label>
+        <select id="dyModel">
+          <option value="">请选择</option>
+          <option>HD08</option>
+          <option>HD15</option>
+          <option>HD16</option>
+        </select>
+
+        <label>快递单号</label>
+        <input id="dyTracking" placeholder="请输入快递单号">
+
+        <label>收货地址</label>
+        <textarea id="dyAddress" placeholder="请输入收货人、手机号和详细地址"></textarea>
+
+        <div class="two-fields">
+          <div>
+            <label>成本</label>
+            <input id="dyCost" type="number" step="0.01" oninput="DysonApp.profit()" placeholder="成本">
+          </div>
+          <div>
+            <label>售价</label>
+            <input id="dyPrice" type="number" step="0.01" oninput="DysonApp.profit()" placeholder="售价">
+          </div>
+        </div>
+
+        <label>利润</label>
+        <input id="dyProfit" class="profit-input" readonly placeholder="自动计算">
+
+        <label>备注</label>
+        <textarea id="dyNote" placeholder="可填写颜色、配件、客户说明等"></textarea>
+
+        <div id="dyEditOptions" class="hidden">
+          <label>本次编辑类型</label>
+          <select id="dyEditType" onchange="DysonApp.editType()">
+            <option value="">请选择</option>
+            <option>换货</option>
+            <option>其他</option>
+          </select>
+
+          <div id="dyEditOtherBox" class="hidden">
+            <label>其他编辑说明</label>
+            <input id="dyEditOther" placeholder="请输入本次修改原因">
+          </div>
+
+          <label>删除原因</label>
+          <select id="dyDeleteReason" onchange="DysonApp.deleteType()">
+            <option value="">请选择</option>
+            <option>退货</option>
+            <option>其他</option>
+          </select>
+
+          <div id="dyDeleteOtherBox" class="hidden">
+            <label>其他删除原因</label>
+            <input id="dyDeleteOther" placeholder="请输入删除原因">
+          </div>
+
+          <button class="dy-danger" onclick="DysonApp.deleteOrder()">删除订单并转到售后</button>
+        </div>
+
+        <button id="dySaveOrder" class="primary-button" onclick="DysonApp.saveOrder()">保存订单</button>
+      </div>
+    </section>
+
+    <section id="dy-page-list" class="dy-page">
+      <div class="box">
+        <h2>戴森订单明细</h2>
+
+        <label>搜索订单</label>
+        <div class="dy-search-wrap">
+          <span>⌕</span>
+          <input id="dySearch" placeholder="搜索型号、快递单号、地址、备注等" oninput="DysonApp.orders()">
+        </div>
+
+        <label>选择日期</label>
+        <select id="dyDateFilter" onchange="DysonApp.orders()">
+          <option value="all">全部日期</option>
+        </select>
+
+        <div class="summary-grid">
+          <div class="summary-card"><div class="summary-label">订单数量</div><div class="summary-value" id="dyCount">0</div></div>
+          <div class="summary-card"><div class="summary-label">总成本</div><div class="summary-value" id="dyCostTotal">¥0.00</div></div>
+          <div class="summary-card"><div class="summary-label">总售价</div><div class="summary-value" id="dyPriceTotal">¥0.00</div></div>
+          <div class="summary-card"><div class="summary-label">总利润</div><div class="summary-value" id="dyProfitTotal">¥0.00</div></div>
+        </div>
+
+        <div id="dyOrderList"></div>
+      </div>
+    </section>
+
+    <section id="dy-page-stock" class="dy-page">
+      <div class="box">
+        <h2 id="dyStockTitle">新增戴森库存</h2>
+
+        <label>戴森型号</label>
+        <select id="dyStockModel">
+          <option value="">请选择</option>
+          <option>HD08</option>
+          <option>HD15</option>
+          <option>HD16</option>
+        </select>
+
+        <label>渠道</label>
+        <input id="dyStockChannel" placeholder="例如：阿冰、拍机堂">
+
+        <label>成本</label>
+        <input id="dyStockCost" type="number" step="0.01" placeholder="库存成本">
+
+        <label>备注</label>
+        <textarea id="dyStockNote" placeholder="可填写颜色、配件、机器状态等"></textarea>
+
+        <button id="dySaveStock" class="primary-button" onclick="DysonApp.saveStock()">添加库存</button>
+
+        <div id="dySoldPanel" class="hidden">
+          <label>销售人</label>
+          <input id="dySeller" placeholder="请输入销售人">
+
+          <label>单号</label>
+          <input id="dySoldNo" placeholder="请输入销售单号">
+
+          <button class="dy-danger" style="background:#fff7ed;color:#ea580c" onclick="DysonApp.sold()">标记为已售出</button>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>库存明细</h2>
+        <div class="summary-grid">
+          <div class="summary-card"><div class="summary-label">库存数量</div><div class="summary-value" id="dyStockCount">0</div></div>
+          <div class="summary-card"><div class="summary-label">库存总成本</div><div class="summary-value" id="dyStockTotal">¥0.00</div></div>
+        </div>
+        <div id="dyStockList"></div>
+      </div>
+
+      <div class="box">
+        <h2>已售出记录</h2>
+        <div id="dySoldList"></div>
+      </div>
+    </section>
+
+    <section id="dy-page-after" class="dy-page">
+      <div class="box">
+        <h2>戴森售后</h2>
+        <div id="dyAfterList"></div>
+      </div>
+    </section>
+
+    <section id="dy-page-backup" class="dy-page">
+      <div class="box">
+        <h2>戴森数据备份</h2>
+        <p>导出的是戴森自己的数据，不会包含 7plus 数据。</p>
+        <button class="primary-button" onclick="DysonApp.export()">导出 Excel 备份</button>
+
+        <label>恢复戴森备份</label>
+        <input id="dyRestoreFile" type="file" accept=".xlsx,.xls">
+        <button class="dy-danger" style="color:#2563eb;background:#eef4ff" onclick="DysonApp.restore()">导入并恢复戴森备份</button>
+      </div>
+    </section>
+
+    <section id="dy-page-import" class="dy-page">
+      <div class="box">
+        <h2>导入戴森订单</h2>
+        <p>Excel 第一行需要是表头：日期、型号、快递单号、收货地址、成本、售价、备注。</p>
+        <input id="dyImportFile" type="file" accept=".xlsx,.xls">
+        <button class="primary-button" onclick="DysonApp.import()">导入并生成订单</button>
+      </div>
+    </section>
+  `;
+  main.appendChild(app);
+
+  function setPage(name){
+    document.querySelectorAll(".dy-page").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".dy-tabs button").forEach(x=>x.classList.remove("active"));
+    document.getElementById("dy-page-"+name).classList.add("active");
+    document.getElementById("dy-tab-"+name).classList.add("active");
+    if(name==="list") renderOrders();
+    if(name==="stock") renderStock();
+    if(name==="after") renderAfter();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function workspace(name){
+    const dyson=name==="dyson";
+    document.body.classList.toggle("dyson-mode",dyson);
+    document.getElementById("switch7plus").classList.toggle("active",!dyson);
+    document.getElementById("switchDyson").classList.toggle("active",dyson);
+    if(dyson) setPage("new");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function calcProfit(){
+    const c=Number(document.getElementById("dyCost").value);
+    const p=Number(document.getElementById("dyPrice").value);
+    document.getElementById("dyProfit").value=
+      !isNaN(c)&&!isNaN(p)?(p-c).toFixed(2):"";
+  }
+
+  function editType(){
+    const other=document.getElementById("dyEditType").value==="其他";
+    document.getElementById("dyEditOtherBox").classList.toggle("hidden",!other);
+  }
+  function deleteType(){
+    const other=document.getElementById("dyDeleteReason").value==="其他";
+    document.getElementById("dyDeleteOtherBox").classList.toggle("hidden",!other);
+  }
+
+  function resetOrder(){
+    editingOrder=null;
+    ["dyModel","dyTracking","dyAddress","dyCost","dyPrice","dyProfit","dyNote","dyEditType","dyEditOther","dyDeleteReason","dyDeleteOther"]
+      .forEach(x=>document.getElementById(x).value="");
+    document.getElementById("dyDate").value=today();
+    document.getElementById("dyOrderTitle").textContent="新增戴森订单";
+    document.getElementById("dySaveOrder").textContent="保存订单";
+    document.getElementById("dyEditOptions").classList.add("hidden");
+    editType();deleteType();
+  }
+
+  function saveOrder(){
+    const model=document.getElementById("dyModel").value;
+    const cost=document.getElementById("dyCost").value;
+    const price=document.getElementById("dyPrice").value;
+    if(!model||cost===""||price===""){
+      alert("请填写型号、成本和售价");
+      return;
+    }
+
+    let history=[];
+    if(editingOrder){
+      const type=document.getElementById("dyEditType").value;
+      const other=document.getElementById("dyEditOther").value.trim();
+      if(!type){alert("保存编辑前，请选择：换货或其他");return}
+      if(type==="其他"&&!other){alert("请输入其他编辑说明");return}
+      const old=orders.find(x=>x.id===editingOrder);
+      history=old&&old.history?old.history:[];
+      history.push({date:today(),type:type,reason:type==="其他"?other:"换货"});
+    }
+
+    const item={
+      id:editingOrder||id(),
+      date:document.getElementById("dyDate").value||today(),
+      model,
+      tracking:document.getElementById("dyTracking").value.trim(),
+      address:document.getElementById("dyAddress").value.trim(),
+      cost,price,
+      profit:document.getElementById("dyProfit").value,
+      note:document.getElementById("dyNote").value.trim(),
+      history
+    };
+    if(editingOrder) orders=orders.map(x=>x.id===editingOrder?item:x);
+    else orders.unshift(item);
+    save(keys.orders,orders);
+    resetOrder();
+    updateDateFilter();
+    renderOrders();
+    setPage("list");
+  }
+
+  function editOrder(orderId){
+    const x=orders.find(v=>v.id===orderId);
+    if(!x)return;
+    editingOrder=orderId;
+    document.getElementById("dyDate").value=x.date||today();
+    document.getElementById("dyModel").value=x.model;
+    document.getElementById("dyTracking").value=x.tracking||"";
+    document.getElementById("dyAddress").value=x.address||"";
+    document.getElementById("dyCost").value=x.cost;
+    document.getElementById("dyPrice").value=x.price;
+    document.getElementById("dyNote").value=x.note||"";
+    document.getElementById("dyOrderTitle").textContent="编辑戴森订单";
+    document.getElementById("dySaveOrder").textContent="保存编辑";
+    document.getElementById("dyEditOptions").classList.remove("hidden");
+    calcProfit();setPage("new");
+  }
+
+  function deleteOrder(){
+    const reason=document.getElementById("dyDeleteReason").value;
+    const other=document.getElementById("dyDeleteOther").value.trim();
+    if(!reason){alert("请选择删除原因");return}
+    if(reason==="其他"&&!other){alert("请输入其他删除原因");return}
+    const item=orders.find(x=>x.id===editingOrder);
+    if(!item)return;
+    if(!confirm("确定删除此订单并转到售后吗？"))return;
+    after.unshift({...item,afterDate:today(),afterReason:reason==="其他"?other:"退货"});
+    orders=orders.filter(x=>x.id!==editingOrder);
+    save(keys.orders,orders);save(keys.after,after);
+    resetOrder();updateDateFilter();renderOrders();renderAfter();setPage("after");
+  }
+
+  function updateDateFilter(){
+    const box=document.getElementById("dyDateFilter");
+    const old=box.value;
+    const dates=[...new Set(orders.map(x=>x.date).filter(Boolean))].sort().reverse();
+    box.innerHTML='<option value="all">全部日期</option>'+dates.map(x=>'<option value="'+esc(x)+'">'+esc(dateText(x))+'</option>').join("");
+    box.value=dates.includes(old)?old:"all";
+  }
+
+  function orderCard(x){
+    const profit=Number(x.profit)||0;
+    const last=x.history&&x.history.length?x.history[x.history.length-1]:null;
+    return `
+      <div class="dy-card">
+        <div class="dy-top">
+          <div class="dy-title">${esc(x.model)}</div>
+          <div class="${profit>=0?"dy-green":"dy-red"}">${money(profit)}</div>
+        </div>
+        <div class="dy-meta">${esc(dateText(x.date))} · 快递单号：${esc(x.tracking||"未填写")}</div>
+        <div class="dy-meta">成本 ${money(x.cost)} · 售价 ${money(x.price)}</div>
+        ${x.note?'<div class="dy-meta">备注：'+esc(x.note)+'</div>':""}
+        ${last?'<div class="dy-meta">最近编辑：'+esc(last.type)+' · '+esc(last.reason)+'</div>':""}
+        <details class="address-details"><summary>查看收货地址</summary><div class="address-text">${esc(x.address||"未填写")}</div></details>
+        <button class="dy-edit" onclick="DysonApp.editOrder('${x.id}')">编辑订单</button>
+      </div>
+    `;
+  }
+
+  function renderOrders(){
+    const keyword=(document.getElementById("dySearch").value||"").trim().toLowerCase();
+    const filter=document.getElementById("dyDateFilter").value;
+    const data=orders.filter(x=>{
+      const text=[x.model,x.date,x.tracking,x.address,x.cost,x.price,x.profit,x.note].join(" ").toLowerCase();
+      return (filter==="all"||x.date===filter)&&text.includes(keyword);
+    });
+    const cost=data.reduce((s,x)=>s+(Number(x.cost)||0),0);
+    const price=data.reduce((s,x)=>s+(Number(x.price)||0),0);
+    const profit=data.reduce((s,x)=>s+(Number(x.profit)||0),0);
+    document.getElementById("dyCount").textContent=data.length;
+    document.getElementById("dyCostTotal").textContent=money(cost);
+    document.getElementById("dyPriceTotal").textContent=money(price);
+    document.getElementById("dyProfitTotal").textContent=money(profit);
+
+    const out=document.getElementById("dyOrderList");
+    if(!data.length){out.innerHTML='<div class="empty">没有找到订单。</div>';return}
+    const groups={};
+    data.forEach(x=>(groups[x.date||"未设置"]||(groups[x.date||"未设置"]=[])).push(x));
+    out.innerHTML=Object.keys(groups).sort().reverse().map(d=>{
+      const day=groups[d];
+      const total=day.reduce((s,x)=>s+(Number(x.profit)||0),0);
+      return '<div class="dy-group-title"><span>'+esc(d==="未设置"?"未设置日期":dateText(d))+'</span><span class="dy-green">当日利润：'+money(total)+'</span></div>'+day.map(orderCard).join("");
+    }).join("");
+  }
+
+  function resetStock(){
+    editingInventory=null;
+    ["dyStockModel","dyStockChannel","dyStockCost","dyStockNote","dySeller","dySoldNo"].forEach(x=>document.getElementById(x).value="");
+    document.getElementById("dyStockTitle").textContent="新增戴森库存";
+    document.getElementById("dySaveStock").textContent="添加库存";
+    document.getElementById("dySoldPanel").classList.add("hidden");
+  }
+
+  function saveStock(){
+    const model=document.getElementById("dyStockModel").value;
+    const cost=document.getElementById("dyStockCost").value;
+    if(!model||cost===""){alert("请填写型号和成本");return}
+    const item={
+      id:editingInventory||id(),
+      model,
+      channel:document.getElementById("dyStockChannel").value.trim(),
+      cost,
+      note:document.getElementById("dyStockNote").value.trim()
+    };
+    if(editingInventory) inventory=inventory.map(x=>x.id===editingInventory?item:x);
+    else inventory.unshift(item);
+    save(keys.inventory,inventory);
+    resetStock();renderStock();
+  }
+
+  function editStock(stockId){
+    const x=inventory.find(v=>v.id===stockId);
+    if(!x)return;
+    editingInventory=stockId;
+    document.getElementById("dyStockModel").value=x.model;
+    document.getElementById("dyStockChannel").value=x.channel||"";
+    document.getElementById("dyStockCost").value=x.cost;
+    document.getElementById("dyStockNote").value=x.note||"";
+    document.getElementById("dyStockTitle").textContent="编辑戴森库存";
+    document.getElementById("dySaveStock").textContent="保存修改";
+    document.getElementById("dySoldPanel").classList.remove("hidden");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function markSold(){
+    const seller=document.getElementById("dySeller").value.trim();
+    const no=document.getElementById("dySoldNo").value.trim();
+    if(!seller||!no){alert("请填写销售人和单号");return}
+    const x=inventory.find(v=>v.id===editingInventory);
+    if(!x)return;
+    if(!confirm("确定标记为已售出吗？"))return;
+    sold.unshift({...x,seller,soldNo:no,soldDate:today()});
+    inventory=inventory.filter(x=>x.id!==editingInventory);
+    save(keys.inventory,inventory);save(keys.sold,sold);
+    resetStock();renderStock();
+  }
+
+  function deleteSold(stockId){
+    if(!confirm("确定删除这条已售出记录吗？"))return;
+    sold=sold.filter(x=>x.id!==stockId);
+    save(keys.sold,sold);renderStock();
+  }
+
+  function renderStock(){
+    const total=inventory.reduce((s,x)=>s+(Number(x.cost)||0),0);
+    document.getElementById("dyStockCount").textContent=inventory.length;
+    document.getElementById("dyStockTotal").textContent=money(total);
+    document.getElementById("dyStockList").innerHTML=inventory.length?inventory.map(x=>`
+      <div class="dy-card">
+        <div class="dy-top"><div class="dy-title">${esc(x.model)}</div><b>${money(x.cost)}</b></div>
+        <div class="dy-meta">渠道：${esc(x.channel||"未填写")}</div>
+        ${x.note?'<div class="dy-meta">备注：'+esc(x.note)+'</div>':""}
+        <button class="dy-edit" onclick="DysonApp.editStock('${x.id}')">编辑库存 / 标记售出</button>
+      </div>
+    `).join(""):'<div class="empty">暂时没有库存。</div>';
+
+    document.getElementById("dySoldList").innerHTML=sold.length?sold.map(x=>`
+      <div class="dy-card dy-warn">
+        <div class="dy-top"><div class="dy-title">${esc(x.model)}</div><b>已售出</b></div>
+        <div class="dy-meta">售出日期：${esc(dateText(x.soldDate))}</div>
+        <div class="dy-meta">销售人：${esc(x.seller)} · 单号：${esc(x.soldNo)}</div>
+        <div class="dy-meta">成本：${money(x.cost)}${x.note?" · 备注："+esc(x.note):""}</div>
+        <button class="dy-danger" onclick="DysonApp.deleteSold('${x.id}')">删除已售出记录</button>
+      </div>
+    `).join(""):'<div class="empty">暂时没有已售出记录。</div>';
+  }
+
+  function renderAfter(){
+    const box=document.getElementById("dyAfterList");
+    box.innerHTML=after.length?after.map(x=>`
+      <div class="dy-card dy-after">
+        <div class="dy-top"><div class="dy-title">${esc(x.model)}</div><b>${esc(x.afterReason)}</b></div>
+        <div class="dy-meta">售后日期：${esc(dateText(x.afterDate))} · 原订单日期：${esc(dateText(x.date))}</div>
+        <div class="dy-meta">快递单号：${esc(x.tracking||"未填写")}</div>
+        <div class="dy-meta">成本 ${money(x.cost)} · 售价 ${money(x.price)} · 利润 ${money(x.profit)}</div>
+        ${x.note?'<div class="dy-meta">备注：'+esc(x.note)+'</div>':""}
+        <details class="address-details"><summary>查看收货地址</summary><div class="address-text">${esc(x.address||"未填写")}</div></details>
+        <button class="dy-danger" onclick="DysonApp.deleteAfter('${x.id}')">删除售后记录</button>
+      </div>
+    `).join(""):'<div class="empty">暂时没有售后记录。</div>';
+  }
+
+  function deleteAfter(afterId){
+    if(!confirm("确定删除此售后记录吗？"))return;
+    after=after.filter(x=>x.id!==afterId);
+    save(keys.after,after);renderAfter();
+  }
+
+  function exportExcel(){
+    if(typeof XLSX==="undefined"){alert("Excel 功能正在加载，请稍后再试");return}
+    const wb=XLSX.utils.book_new();
+    function sheet(name,data){
+      XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(data),name);
+    }
+    sheet("戴森订单",orders);
+    sheet("戴森库存",inventory);
+    sheet("戴森已售出",sold);
+    sheet("戴森售后",after);
+    XLSX.writeFile(wb,"戴森数据备份_"+today().replaceAll("-","")+".xlsx");
+  }
+
+  function restoreExcel(){
+    const file=document.getElementById("dyRestoreFile").files[0];
+    if(!file){alert("请先选择备份文件");return}
+    if(typeof XLSX==="undefined"){alert("Excel 功能正在加载，请稍后再试");return}
+    if(!confirm("恢复会覆盖目前的戴森数据，确定继续吗？"))return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const wb=XLSX.read(e.target.result,{type:"array"});
+      orders=XLSX.utils.sheet_to_json(wb.Sheets["戴森订单"]||{}, {defval:""});
+      inventory=XLSX.utils.sheet_to_json(wb.Sheets["戴森库存"]||{}, {defval:""});
+      sold=XLSX.utils.sheet_to_json(wb.Sheets["戴森已售出"]||{}, {defval:""});
+      after=XLSX.utils.sheet_to_json(wb.Sheets["戴森售后"]||{}, {defval:""});
+      save(keys.orders,orders);save(keys.inventory,inventory);save(keys.sold,sold);save(keys.after,after);
+      updateDateFilter();renderOrders();renderStock();renderAfter();
+      alert("戴森数据恢复成功");
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function importExcel(){
+    const file=document.getElementById("dyImportFile").files[0];
+    if(!file){alert("请先选择 Excel 文件");return}
+    if(typeof XLSX==="undefined"){alert("Excel 功能正在加载，请稍后再试");return}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const wb=XLSX.read(e.target.result,{type:"array"});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:""});
+      let added=0;
+      rows.forEach(r=>{
+        const model=String(r["型号"]||r["戴森型号"]||"").toUpperCase();
+        if(!["HD08","HD15","HD16"].includes(model))return;
+        const cost=r["成本"], price=r["售价"];
+        if(cost===""||price==="")return;
+        orders.unshift({
+          id:id(),
+          date:r["日期"]||today(),
+          model,
+          tracking:r["快递单号"]||"",
+          address:r["收货地址"]||"",
+          cost,price,
+          profit:((Number(price)||0)-(Number(cost)||0)).toFixed(2),
+          note:r["备注"]||"",
+          history:[]
+        });
+        added++;
+      });
+      save(keys.orders,orders);
+      updateDateFilter();renderOrders();
+      alert("成功导入 "+added+" 条戴森订单");
+      setPage("list");
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  window.DysonApp={
+    workspace,
+    page:setPage,
+    profit:calcProfit,
+    editType,
+    deleteType,
+    saveOrder,
+    editOrder,
+    deleteOrder,
+    orders:renderOrders,
+    saveStock,
+    editStock,
+    sold:markSold,
+    deleteSold,
+    export:exportExcel,
+    restore:restoreExcel,
+    import:importExcel,
+    deleteAfter
+  };
+
+  resetOrder();
+  resetStock();
+  updateDateFilter();
+  renderOrders();
+  renderStock();
+  renderAfter();
+})();
+</script>
 </html>
