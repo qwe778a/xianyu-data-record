@@ -1728,5 +1728,423 @@ renderAfterSales();
   };
 })();
 </script>
+<style>
+.dyson-profit{background:#eef4ff;color:#2563eb;font-weight:bold}
+.dyson-card{border:1px solid #e2e8f0;border-radius:11px;padding:12px;margin-top:10px}
+.dyson-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.dyson-search{position:relative}
+.dyson-search span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#64748b}
+.dyson-search input{padding-left:42px}
+</style>
+
+<script>
+(function(){
+  const key="dysonOrders";
+  let editingId=null;
+  let dysonOrders=[];
+
+  try{
+    dysonOrders=JSON.parse(localStorage.getItem(key)||"[]");
+    if(!Array.isArray(dysonOrders))dysonOrders=[];
+  }catch(e){
+    dysonOrders=[];
+  }
+
+  document.title="7plus数据";
+
+  const title=document.querySelector("h1");
+  if(title)title.textContent="7plus数据";
+
+  const tabs=document.querySelector(".tabs");
+
+  if(!tabs||document.getElementById("tab-dyson"))return;
+
+  tabs.style.gridTemplateColumns="repeat(3,1fr)";
+
+  const tab=document.createElement("button");
+  tab.id="tab-dyson";
+  tab.className="tab-button";
+  tab.textContent="戴森数据";
+  tab.onclick=function(){
+    showPage("dyson");
+    renderDyson();
+  };
+
+  tabs.appendChild(tab);
+
+  const page=document.createElement("section");
+  page.id="page-dyson";
+  page.className="page";
+
+  page.innerHTML=`
+    <div class="box" id="dysonFormBox">
+      <h2 id="dysonFormTitle">新增戴森订单</h2>
+
+      <label>日期</label>
+      <input id="dysonDate" type="date">
+
+      <label>戴森型号</label>
+      <select id="dysonModel">
+        <option value="">请选择</option>
+        <option>HD08</option>
+        <option>HD15</option>
+        <option>HD16</option>
+      </select>
+
+      <label>快递单号</label>
+      <input id="dysonTracking" placeholder="请输入快递单号">
+
+      <label>收货地址</label>
+      <textarea id="dysonAddress"
+        placeholder="请输入收货人、手机号和详细地址"></textarea>
+
+      <div class="two-fields">
+        <div>
+          <label>成本</label>
+          <input id="dysonCost" type="number" step="0.01"
+            placeholder="成本" oninput="calcDysonProfit()">
+        </div>
+
+        <div>
+          <label>售价</label>
+          <input id="dysonPrice" type="number" step="0.01"
+            placeholder="售价" oninput="calcDysonProfit()">
+        </div>
+      </div>
+
+      <label>利润</label>
+      <input id="dysonProfit" class="dyson-profit"
+        placeholder="自动计算" readonly>
+
+      <label>备注</label>
+      <textarea id="dysonRemark"
+        placeholder="选填，例如颜色、配件、成色等"></textarea>
+
+      <button id="dysonSaveButton"
+        class="primary-button"
+        onclick="saveDysonOrder()">
+        保存戴森订单
+      </button>
+
+      <button id="dysonDeleteButton"
+        class="delete-button hidden"
+        onclick="deleteDysonOrder()">
+        删除戴森订单
+      </button>
+    </div>
+
+    <div class="box">
+      <h2>戴森订单明细</h2>
+
+      <label>搜索戴森订单</label>
+      <div class="dyson-search">
+        <span>⌕</span>
+        <input id="dysonSearch"
+          placeholder="搜索型号、单号、地址、备注等"
+          oninput="renderDyson()">
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-label">订单数量</div>
+          <div class="summary-value" id="dysonCount">0</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">总成本</div>
+          <div class="summary-value" id="dysonTotalCost">¥0.00</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">总售价</div>
+          <div class="summary-value" id="dysonTotalPrice">¥0.00</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">总利润</div>
+          <div class="summary-value" id="dysonTotalProfit">¥0.00</div>
+        </div>
+      </div>
+
+      <div id="dysonList"></div>
+    </div>
+  `;
+
+  document.querySelector("main").appendChild(page);
+
+  function today(){
+    const n=new Date();
+
+    return n.getFullYear()+"-"+
+      String(n.getMonth()+1).padStart(2,"0")+"-"+
+      String(n.getDate()).padStart(2,"0");
+  }
+
+  function dateText(date){
+    if(!date)return"未设置日期";
+
+    const p=String(date).split("-");
+
+    return Number(p[1])+"月"+Number(p[2])+"日";
+  }
+
+  function money(value){
+    return "¥"+(Number(value)||0).toFixed(2);
+  }
+
+  function safe(value){
+    return String(value||"")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  window.calcDysonProfit=function(){
+    const cost=parseFloat(document.getElementById("dysonCost").value);
+    const price=parseFloat(document.getElementById("dysonPrice").value);
+
+    document.getElementById("dysonProfit").value=
+      !isNaN(cost)&&!isNaN(price)
+        ?(price-cost).toFixed(2)
+        :"";
+  };
+
+  window.saveDysonOrder=function(){
+    const date=document.getElementById("dysonDate").value;
+    const model=document.getElementById("dysonModel").value;
+    const cost=document.getElementById("dysonCost").value;
+    const price=document.getElementById("dysonPrice").value;
+
+    if(!date||!model||cost===""||price===""){
+      alert("请填写日期、型号、成本和售价");
+      return;
+    }
+
+    const order={
+      id:editingId||("dyson-"+Date.now()),
+      date:date,
+      model:model,
+      trackingNumber:document.getElementById("dysonTracking").value.trim(),
+      address:document.getElementById("dysonAddress").value.trim(),
+      cost:cost,
+      price:price,
+      profit:(Number(price)-Number(cost)).toFixed(2),
+      remark:document.getElementById("dysonRemark").value.trim()
+    };
+
+    if(editingId){
+      dysonOrders=dysonOrders.map(function(item){
+        return item.id===editingId?order:item;
+      });
+    }else{
+      dysonOrders.unshift(order);
+    }
+
+    localStorage.setItem(key,JSON.stringify(dysonOrders));
+
+    resetDysonForm();
+    renderDyson();
+  };
+
+  window.editDysonOrder=function(id){
+    const item=dysonOrders.find(function(order){
+      return order.id===id;
+    });
+
+    if(!item)return;
+
+    editingId=id;
+
+    document.getElementById("dysonDate").value=item.date||today();
+    document.getElementById("dysonModel").value=item.model||"";
+    document.getElementById("dysonTracking").value=item.trackingNumber||"";
+    document.getElementById("dysonAddress").value=item.address||"";
+    document.getElementById("dysonCost").value=item.cost||"";
+    document.getElementById("dysonPrice").value=item.price||"";
+    document.getElementById("dysonRemark").value=item.remark||"";
+
+    calcDysonProfit();
+
+    document.getElementById("dysonFormTitle").textContent="编辑戴森订单";
+    document.getElementById("dysonSaveButton").textContent="保存修改";
+    document.getElementById("dysonDeleteButton").classList.remove("hidden");
+
+    document.getElementById("dysonFormBox").scrollIntoView({
+      behavior:"smooth"
+    });
+  };
+
+  window.deleteDysonOrder=function(){
+    if(!editingId)return;
+
+    if(!confirm("确定删除这条戴森订单吗？")){
+      return;
+    }
+
+    dysonOrders=dysonOrders.filter(function(item){
+      return item.id!==editingId;
+    });
+
+    localStorage.setItem(key,JSON.stringify(dysonOrders));
+
+    resetDysonForm();
+    renderDyson();
+  };
+
+  function resetDysonForm(){
+    editingId=null;
+
+    [
+      "dysonModel",
+      "dysonTracking",
+      "dysonAddress",
+      "dysonCost",
+      "dysonPrice",
+      "dysonProfit",
+      "dysonRemark"
+    ].forEach(function(id){
+      document.getElementById(id).value="";
+    });
+
+    document.getElementById("dysonDate").value=today();
+    document.getElementById("dysonFormTitle").textContent="新增戴森订单";
+    document.getElementById("dysonSaveButton").textContent="保存戴森订单";
+    document.getElementById("dysonDeleteButton").classList.add("hidden");
+  }
+
+  window.renderDyson=function(){
+    const search=document.getElementById("dysonSearch")
+      ?document.getElementById("dysonSearch").value.trim().toLowerCase()
+      :"";
+
+    const list=dysonOrders.filter(function(item){
+      const all=[
+        item.date,
+        item.model,
+        item.trackingNumber,
+        item.address,
+        item.cost,
+        item.price,
+        item.profit,
+        item.remark
+      ].join(" ").toLowerCase();
+
+      return all.includes(search);
+    });
+
+    const cost=list.reduce(function(sum,item){
+      return sum+(Number(item.cost)||0);
+    },0);
+
+    const price=list.reduce(function(sum,item){
+      return sum+(Number(item.price)||0);
+    },0);
+
+    const profit=list.reduce(function(sum,item){
+      return sum+(Number(item.profit)||0);
+    },0);
+
+    document.getElementById("dysonCount").textContent=list.length;
+    document.getElementById("dysonTotalCost").textContent=money(cost);
+    document.getElementById("dysonTotalPrice").textContent=money(price);
+    document.getElementById("dysonTotalProfit").textContent=money(profit);
+
+    const box=document.getElementById("dysonList");
+
+    if(!list.length){
+      box.innerHTML='<div class="empty">暂时还没有戴森订单。</div>';
+      return;
+    }
+
+    const groups={};
+
+    list.forEach(function(item){
+      const day=item.date||"未设置";
+
+      if(!groups[day]){
+        groups[day]=[];
+      }
+
+      groups[day].push(item);
+    });
+
+    box.innerHTML=Object.keys(groups)
+      .sort()
+      .reverse()
+      .map(function(day){
+        const items=groups[day];
+
+        const dayProfit=items.reduce(function(sum,item){
+          return sum+(Number(item.profit)||0);
+        },0);
+
+        return `
+          <div class="date-group">
+            <div class="date-heading">
+              <span>${safe(dateText(day))}</span>
+              <span class="daily-profit">
+                当日利润：${money(dayProfit)}
+              </span>
+            </div>
+
+            ${items.map(function(item){
+              const profit=Number(item.profit)||0;
+
+              return `
+                <div class="dyson-card">
+                  <div class="dyson-top">
+                    <div class="item-title">戴森 ${safe(item.model)}</div>
+
+                    <strong class="${
+                      profit>=0?"profit-positive":"profit-negative"
+                    }">
+                      ${money(profit)}
+                    </strong>
+                  </div>
+
+                  <div class="meta-line">
+                    ${safe(dateText(item.date))}
+                  </div>
+
+                  <div class="meta-line">
+                    快递单号：${safe(item.trackingNumber||"未填写")}
+                  </div>
+
+                  <div class="money-line">
+                    成本 ${money(item.cost)}
+                    · 售价 ${money(item.price)}
+                  </div>
+
+                  <details class="address-details">
+                    <summary>查看收货地址</summary>
+                    <div class="address-text">
+                      ${safe(item.address||"未填写")}
+                    </div>
+                  </details>
+
+                  ${
+                    item.remark
+                      ?`<div class="edit-note">备注：${safe(item.remark)}</div>`
+                      :""
+                  }
+
+                  <button class="edit-button"
+                    onclick="editDysonOrder('${safe(item.id)}')">
+                    编辑戴森订单
+                  </button>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        `;
+      }).join("");
+  };
+
+  resetDysonForm();
+  renderDyson();
+})();
+</script>
 </body>
 </html>
