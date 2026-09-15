@@ -2897,4 +2897,26 @@ body.dyson-mode #dysonApp{display:block}
   renderAfter();
 })();
 </script>
+<!-- 修复 7plus / 戴森 页面切换 -->
+<style>
+/* 默认隐藏新版戴森区域 */
+#dysonAppV2 {
+  display: none !important;
+}
+
+/* 戴森模式：隐藏 7plus，保留顶部切换按钮和戴森 */
+body.dyson-mode main > :not(.workspace-switch):not(#dysonAppV2) {
+  display: none !important;
+}
+
+body.dyson-mode main > #dysonAppV2 {
+  display: block !important;
+}
+
+/* 隐藏旧版戴森入口 */
+#tab-dyson,
+#page-dyson {
+  display: none !important;
+}
+</style>
 </html>
