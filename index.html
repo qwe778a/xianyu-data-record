@@ -3,2920 +3,693 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>闲鱼数据记录</title>
+<title>7plus · 戴森数据</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#1f2937}
-main{max-width:750px;margin:auto;padding:20px 14px 50px}
-h1{margin:0 0 6px;color:#2563eb}
-h2{margin:0 0 12px}
-p{color:#64748b}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:18px 0}
-button{padding:12px;border:0;border-radius:9px;font-size:16px;cursor:pointer}
-.tab-button{padding:11px 3px;background:#e5e7eb;color:#475569;font-size:14px}
-.tab-button.active{background:#2563eb;color:white}
-.page{display:none}
-.page.active{display:block}
-.box{background:white;border-radius:16px;padding:17px;margin-top:15px}
-label{display:block;margin:13px 0 6px;font-weight:bold}
-input,select,textarea{width:100%;padding:13px;border:1px solid #dbe2ea;border-radius:9px;font-size:16px;background:white;min-width:0}
-textarea{height:85px;resize:vertical}
-.two-fields{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.two-fields.single{grid-template-columns:1fr}
+body{margin:0;background:#f5f7fb;color:#1f2937;font:16px Arial,sans-serif}
+main{max-width:760px;margin:auto;padding:20px 14px 60px}
+h1{font-size:28px;color:#2563eb;margin:18px 0}
+h2{font-size:22px;margin:0 0 15px}
+h3{font-size:17px;margin:15px 0 8px}
+button,input,select,textarea{font:inherit;border-radius:10px}
+button{border:0;padding:12px;background:#e8edf5;color:#334155;cursor:pointer}
+input,select,textarea{width:100%;min-width:0;border:1px solid #dbe2ea;padding:12px;background:white;color:#1f2937}
+textarea{min-height:85px;resize:vertical}
+label{display:block;font-weight:bold;margin:13px 0 6px}
+nav,.row,.stats{display:grid;gap:9px}
+.brands,.row{grid-template-columns:1fr 1fr}
+.tabs{grid-template-columns:repeat(3,1fr);margin:16px 0}
+.tabs button{font-size:14px;padding:11px 3px}
+.active,.primary{background:#2563eb;color:white}
+.box{padding:16px;background:white;border-radius:16px;margin:15px 0}
+.card{border:1px solid #e2e8f0;padding:12px;border-radius:11px;margin-top:10px}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.meta{font-size:14px;color:#64748b;margin-top:7px;line-height:1.5;overflow-wrap:anywhere}
+.stats{grid-template-columns:1fr 1fr;margin:14px 0}
+.stat{background:#f8fafc;border:1px solid #e2e8f0;padding:12px;border-radius:10px}
+.stat small{color:#64748b}
+.stat strong{display:block;font-size:20px;margin-top:5px}
+.wide{width:100%;margin-top:12px}
+.danger{background:#fee2e2;color:#dc2626}
+.edit{background:#eef4ff;color:#2563eb}
+.good{color:#16a34a}
+.bad{color:#dc2626}
+.day{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #e2e8f0;padding:16px 0 8px;font-weight:bold}
+.sold{border-left:4px solid #f59e0b;background:#fffbeb}
+.after{border-left:4px solid #ef4444;background:#fff7f7}
+details{margin-top:8px;font-size:14px}
+summary{color:#2563eb;cursor:pointer}
+.pre{white-space:pre-wrap;overflow-wrap:anywhere}
+.empty{text-align:center;padding:20px;color:#64748b}
 .hidden{display:none!important}
-.profit-input{background:#eef4ff;color:#2563eb;font-weight:bold}
-.primary-button{width:100%;margin-top:17px;background:#2563eb;color:white}
-.delete-button{width:100%;margin-top:10px;background:#fee2e2;color:#dc2626}
-.small-delete-button{width:100%;padding:9px;margin-top:9px;background:#fee2e2;color:#dc2626;font-size:14px}
-.edit-panel{margin-top:17px;padding:14px;border:1px solid #bfdbfe;border-radius:12px;background:#eff6ff}
-.edit-panel h3{margin:0 0 6px;color:#1d4ed8}
-.delete-panel{margin-top:14px;padding-top:4px;border-top:1px solid #fecaca}
-.sold-box{margin-top:14px;padding:13px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px}
-.sold-box h3{margin:0}
-.sold-button{width:100%;margin-top:12px;background:#ffedd5;border:1px solid #fdba74;color:#c2410c}
-.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
-.summary-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:11px;padding:11px}
-.summary-label{color:#64748b;font-size:13px}
-.summary-value{font-size:19px;font-weight:bold;margin-top:4px;overflow-wrap:anywhere}
-.date-group{margin-top:17px}
-.date-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 2px;border-bottom:1px solid #dbe2ea;font-weight:bold}
-.daily-profit{font-size:14px}
-.compact-card{border:1px solid #e2e8f0;border-radius:11px;padding:11px 12px;margin-top:9px;background:white}
-.compact-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.item-title{font-size:16px;font-weight:bold;overflow-wrap:anywhere}
-.profit-positive{color:#16a34a;font-weight:bold}
-.profit-negative{color:#dc2626;font-weight:bold}
-.meta-line{color:#64748b;font-size:14px;margin-top:6px;line-height:1.45;overflow-wrap:anywhere}
-.money-line{color:#334155;font-size:14px;margin-top:6px}
-.edit-note{margin-top:7px;padding:7px 9px;border-radius:8px;background:#fff7ed;color:#9a3412;font-size:13px}
-.address-details{margin-top:7px;color:#64748b;font-size:14px}
-.address-details summary{color:#2563eb;cursor:pointer}
-.address-text{margin-top:7px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
-.edit-button{width:100%;padding:9px;margin-top:9px;background:#eef4ff;color:#2563eb;font-size:14px}
-.sold-card{border-left:4px solid #f59e0b;background:#fffbeb}
-.after-card{border-left:4px solid #ef4444;background:#fff7f7}
-.remark{white-space:pre-wrap;background:#f8fafc;padding:8px;border-radius:7px}
-.search-box{position:relative}
-.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:21px;height:21px;color:#64748b;pointer-events:none}
-.search-input{padding-left:43px;background:#f8fafc}
-.empty{color:#64748b;text-align:center;padding:18px 0}
-.hint{font-size:13px;color:#64748b;line-height:1.5}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:13px;width:21px;height:21px;color:#64748b}
+.search input{padding-left:42px}
+#lock{position:fixed;inset:0;background:#f5f7fb;z-index:9999;display:grid;place-items:center;padding:20px}
+#lock .box{width:100%;max-width:410px}
+#pin,#again{letter-spacing:5px;text-align:center}
+.notice{color:#9a3412;background:#fff7ed;padding:10px;border-radius:9px;font-size:14px}
 </style>
 </head>
 <body>
-<main>
-<h1>闲鱼数据记录</h1>
-<p>订单、库存和售后管理</p>
-
-<nav class="tabs" aria-label="页面导航">
-  <button id="tab-new-order" class="tab-button active"
-    onclick="startNewOrder()">新增订单</button>
-  <button id="tab-order-list" class="tab-button"
-    onclick="showPage('order-list')">订单明细</button>
-  <button id="tab-inventory" class="tab-button"
-    onclick="showPage('inventory')">库存</button>
-  <button id="tab-after-sales" class="tab-button"
-    onclick="showPage('after-sales')">售后</button>
-</nav>
-
-<section id="page-new-order" class="page active">
-<div class="box">
-  <h2 id="orderFormTitle">新增订单</h2>
-
-  <label for="orderDate">日期</label>
-  <input id="orderDate" type="date">
-
-  <div id="orderProductFields"></div>
-
-  <label for="trackingNumber">快递单号</label>
-  <input id="trackingNumber" placeholder="请输入快递单号">
-
-  <label for="address">收货地址</label>
-  <textarea id="address" placeholder="请输入收货人、手机号和详细地址"></textarea>
-
-  <div class="two-fields">
-    <div>
-      <label for="orderCost">成本</label>
-      <input id="orderCost" type="number" min="0" step="0.01"
-        placeholder="成本" oninput="calculateProfit()">
-    </div>
-    <div>
-      <label for="orderPrice">售价</label>
-      <input id="orderPrice" type="number" min="0" step="0.01"
-        placeholder="售价" oninput="calculateProfit()">
-    </div>
-  </div>
-
-  <label for="orderProfit">利润</label>
-  <input id="orderProfit" class="profit-input" placeholder="自动计算" readonly>
-
-  <div id="orderEditPanel" class="edit-panel hidden">
-    <h3>本次编辑类型</h3>
-    <label for="editType">选择编辑类型</label>
-    <select id="editType" onchange="toggleOther('editType','customEditBox')">
-      <option value="">请选择</option>
-      <option>换货</option>
-      <option>其他</option>
-    </select>
-    <div id="customEditBox" class="hidden">
-      <label for="customEditReason">其他编辑说明</label>
-      <input id="customEditReason" placeholder="请输入本次修改的原因">
-    </div>
-
-    <div class="delete-panel">
-      <label for="deleteReason">删除原因</label>
-      <select id="deleteReason"
-        onchange="toggleOther('deleteReason','customDeleteBox')">
-        <option value="">请选择</option>
-        <option>退货</option>
-        <option>其他</option>
-      </select>
-      <div id="customDeleteBox" class="hidden">
-        <label for="customDeleteReason">其他删除原因</label>
-        <input id="customDeleteReason" placeholder="请输入删除原因">
-      </div>
-      <button class="delete-button" onclick="deleteOrder()">
-        删除订单并转到售后
-      </button>
-    </div>
-  </div>
-
-  <button id="saveOrderButton" class="primary-button" onclick="saveOrder()">
-    保存订单
-  </button>
-</div>
-</section>
-
-<section id="page-order-list" class="page">
-<div class="box">
-  <h2>订单明细</h2>
-
-  <label for="orderSearch">搜索订单</label>
-  <div class="search-box">
-    <svg class="search-icon" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <circle cx="10.5" cy="10.5" r="6.5"></circle>
-      <path d="m16 16 5 5" stroke-linecap="round"></path>
-    </svg>
-    <input id="orderSearch" class="search-input" type="search"
-      placeholder="搜索型号、单号、地址、渠道等"
-      oninput="renderOrders()">
-  </div>
-
-  <label for="orderDateFilter">选择日期</label>
-  <select id="orderDateFilter" onchange="renderOrders()">
-    <option value="all">全部日期</option>
-  </select>
-
-  <div class="summary-grid">
-    <div class="summary-card">
-      <div class="summary-label">订单数量</div>
-      <div class="summary-value" id="summaryCount">0</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">总成本</div>
-      <div class="summary-value" id="summaryCost">¥0.00</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">总售价</div>
-      <div class="summary-value" id="summaryPrice">¥0.00</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">总利润</div>
-      <div class="summary-value" id="summaryProfit">¥0.00</div>
-    </div>
-  </div>
-  <div id="orderList"></div>
-</div>
-</section>
-
-<section id="page-inventory" class="page">
-<div class="box" id="inventoryFormBox">
-  <h2 id="inventoryFormTitle">新增库存</h2>
-
-  <div id="inventoryProductFields"></div>
-
-  <label for="inventoryCost">成本</label>
-  <input id="inventoryCost" type="number" min="0" step="0.01"
-    placeholder="请输入库存成本">
-
-  <label for="inventoryRemark">备注</label>
-  <textarea id="inventoryRemark"
-    placeholder="选填，例如成色、配件、机器情况等"></textarea>
-
-  <button id="saveInventoryButton" class="primary-button"
-    onclick="saveInventory()">添加库存</button>
-
-  <div id="soldBox" class="sold-box hidden">
-    <h3>售出信息</h3>
-    <div class="two-fields">
-      <div>
-        <label for="soldSeller">销售人</label>
-        <input id="soldSeller" placeholder="请输入销售人">
-      </div>
-      <div>
-        <label for="soldOrderNumber">单号</label>
-        <input id="soldOrderNumber" placeholder="请输入单号">
-      </div>
-    </div>
-    <p class="hint">标记售出前，销售人和单号都需要填写。当前库存修改和备注也会一起保存。</p>
-    <button class="sold-button" onclick="markInventorySold()">
-      标记为已售出
-    </button>
+<div id="lock">
+  <div class="box">
+    <h2 id="lockTitle">页面解锁</h2>
+    <p class="meta">当前浏览器的页面锁，订单数据仍保存在本机。</p>
+    <input id="pin" type="password" inputmode="numeric" maxlength="6" placeholder="六位数字密码">
+    <input id="again" class="hidden" type="password" inputmode="numeric" maxlength="6" placeholder="再次输入密码" style="margin-top:10px">
+    <button class="wide primary" onclick="unlockPin()">确认</button>
+    <button id="faceButton" class="wide edit hidden" onclick="unlockFace()">Face ID / 指纹解锁</button>
+    <p id="lockMessage" class="meta"></p>
   </div>
 </div>
 
-<div class="box">
-  <h2>库存明细</h2>
-  <div class="summary-grid">
-    <div class="summary-card">
-      <div class="summary-label">库存数量</div>
-      <div class="summary-value" id="inventoryCount">0</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">库存总成本</div>
-      <div class="summary-value" id="inventoryTotalCost">¥0.00</div>
-    </div>
-  </div>
-  <div id="inventoryList"></div>
-</div>
-
-<div class="box">
-  <h2>已售出记录</h2>
-  <div id="soldInventoryList"></div>
-</div>
-</section>
-
-<section id="page-after-sales" class="page">
-<div class="box">
-  <h2>售后</h2>
-  <div class="summary-card">
-    <div class="summary-label">售后记录数量</div>
-    <div class="summary-value" id="afterSalesCount">0</div>
-  </div>
-  <div id="afterSalesList"></div>
-</div>
-</section>
+<main id="app" hidden>
+  <nav class="brands">
+    <button id="brand-seven" class="active" onclick="switchBrand('seven')">7plus</button>
+    <button id="brand-dyson" onclick="switchBrand('dyson')">戴森</button>
+  </nav>
+  <h1 id="title">7plus数据</h1>
+  <nav class="tabs" id="tabs"></nav>
+  <div id="message" class="notice hidden"></div>
+  <section id="content"></section>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-const orderKey="xianyuOrders";
-const inventoryKey="xianyuInventory";
-const soldKey="xianyuSoldInventory";
-const afterSalesKey="xianyuAfterSales";
+'use strict';
 
 const $=id=>document.getElementById(id);
-const value=id=>$(id).value.trim();
+const val=id=>$(id).value.trim();
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[c]));
+const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2);
+const clone=x=>JSON.parse(JSON.stringify(x));
+const money=x=>'¥'+(Number(x)||0).toFixed(2);
+const today=()=>{
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+};
+const md=d=>/^\d{4}-\d{2}-\d{2}$/.test(String(d))?Number(d.slice(5,7))+'月'+Number(d.slice(8))+'日':'未设置日期';
+const profit=x=>(Math.round(Number(x.price||0)*100)-Math.round(Number(x.cost||0)*100))/100;
+const names=['新增订单','订单明细','库存','售后','备份','数据导入'];
+const versions=['Wi-Fi','无锁Wi-Fi','无锁纯原Wi-Fi','插卡','无锁插卡','无锁纯原插卡'];
+const channels=['阿冰','小四','鸿福','拍机堂','无货源'];
+const models=['HD08','HD15','HD16'];
+const sheetNames={o:'订单明细',i:'库存',s:'已售出',a:'售后'};
+const sevenKeys={o:'xianyuOrders',i:'xianyuInventory',s:'xianyuSoldInventory',a:'xianyuAfterSales'};
+const sources={
+  v3:{o:'dysonOrdersV3',i:'dysonInventoryV3',s:'dysonSoldV3',a:'dysonAfterSalesV3'},
+  v2:{o:'dysonV2Orders',i:'dysonV2Inventory',s:'dysonV2Sold',a:'dysonV2AfterSales'},
+  old:{o:'dysonOrders',i:'dysonInventory',s:'dysonSoldInventory',a:'dysonAfterSales'}
+};
+let brand='seven',page=0,editing=null,db={},blocked=false;
+let search='',filterDate='all',pending=null;
 
-let editingOrderId=null;
-let editingInventoryId=null;
-let storageBlocked=false;
-
-function readRecords(key){
-  try{
-    const raw=localStorage.getItem(key);
-    if(raw===null)return [];
-    const parsed=JSON.parse(raw);
-    if(!Array.isArray(parsed))throw new Error("格式错误");
-    return parsed;
-  }catch(error){
-    storageBlocked=true;
-    alert("数据读取失败："+key+"。为保护原数据，本次禁止保存和删除。请勿清除浏览器数据。");
-    return [];
-  }
+function read(key){
+  const raw=localStorage.getItem(key);
+  if(raw===null)return [];
+  const data=JSON.parse(raw);
+  if(!Array.isArray(data)||data.some(x=>!x||typeof x!=='object'||Array.isArray(x)))
+    throw Error(key+' 格式异常');
+  return data;
 }
-
-let orders=readRecords(orderKey);
-let inventory=readRecords(inventoryKey);
-let soldInventory=readRecords(soldKey);
-let afterSales=readRecords(afterSalesKey);
-
-/* 保存失败时不清空表单，也不更新页面中的数据 */
-function persist(entries){
-  if(storageBlocked){
-    alert("当前数据读取异常，已暂停保存和删除。");
-    return false;
-  }
-  let previous=[];
-  try{
-    previous=entries.map(([key])=>[key,localStorage.getItem(key)]);
-    entries.forEach(([key,data])=>{
-      localStorage.setItem(key,JSON.stringify(data));
-    });
-    return true;
-  }catch(error){
-    try{
-      previous.forEach(([key,data])=>{
-        if(data===null)localStorage.removeItem(key);
-        else localStorage.setItem(key,data);
-      });
-    }catch(rollbackError){
-      storageBlocked=true;
-    }
-    alert("保存失败，可能是浏览器储存空间不足。请保留当前页面，不要清除浏览器数据。");
-    return false;
-  }
+function sourceCount(keys){
+  try{return Object.values(keys).reduce((n,k)=>n+read(k).length,0)}
+  catch{return -1}
 }
-
-function uid(){
-  return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10);
+function chooseSource(){
+  const saved=localStorage.getItem('dysonActiveSource');
+  if(sources[saved])return saved;
+  return ['v3','v2','old'].find(s=>sourceCount(sources[s])>0)
+    ||['v3','v2','old'].find(s=>Object.values(sources[s]).some(k=>localStorage.getItem(k)!==null))
+    ||'v2';
 }
-
-function safeText(v){
-  return String(v??"").replace(/[&<>"']/g,c=>({
-    "&":"&amp;","<":"&lt;",">":"&gt;",
-    '"':"&quot;","'":"&#039;"
-  }[c]));
-}
-
-function sameId(a,b){return String(a)===String(b)}
-
-function money(v){
-  return "¥"+(Number(v)||0).toFixed(2);
-}
-
-function getToday(){
-  const n=new Date();
-  return n.getFullYear()+"-"+
-    String(n.getMonth()+1).padStart(2,"0")+"-"+
-    String(n.getDate()).padStart(2,"0");
-}
-
-function formatDate(date){
-  const match=String(date||"").match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return match?Number(match[2])+"月"+Number(match[3])+"日":"未设置日期";
-}
-
-function profitOf(order){
-  return (Math.round(Number(order.price||0)*100)-
-    Math.round(Number(order.cost||0)*100))/100;
-}
-
-function profitClass(amount){
-  return amount>=0?"profit-positive":"profit-negative";
-}
-
-function productTitle(item){
-  const fingerprint=String(item.version||"").includes("纯原")||
-    item.fingerprint==="不适用"?"":item.fingerprint;
-  return [item.version,item.capacity,fingerprint].filter(Boolean).join(" ");
-}
-
-function actionButton(text,action,id,cls="edit-button"){
-  return `<button class="${cls}" data-action="${action}"
-    data-id="${safeText(id)}">${safeText(text)}</button>`;
-}
-
-document.addEventListener("click",event=>{
-  const button=event.target.closest("button[data-action]");
-  if(!button)return;
-  const actions={
-    editOrder,editInventory,deleteSoldInventory,deleteAfterSales
-  };
-  const handler=actions[button.dataset.action];
-  if(handler)handler(button.dataset.id);
-});
-
-function showPage(name){
-  document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
-  document.querySelectorAll(".tab-button").forEach(el=>el.classList.remove("active"));
-  $("page-"+name).classList.add("active");
-  $("tab-"+name).classList.add("active");
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function startNewOrder(){
-  if(editingOrderId!==null){
-    if(!confirm("返回新增订单？尚未保存的编辑内容将放弃，原订单保持不变。"))return;
-  }
-  resetOrderForm();
-  showPage("new-order");
-}
-
-function options(items){
-  return '<option value="">请选择</option>'+
-    items.map(v=>`<option>${safeText(v)}</option>`).join("");
-}
-
-function productFields(prefix){
-  return `
-    <label for="${prefix}Version">网络和版本</label>
-    <select id="${prefix}Version" onchange="checkVersion('${prefix}')">
-      ${options(["Wi-Fi","无锁Wi-Fi","无锁纯原Wi-Fi","插卡","无锁插卡","无锁纯原插卡"])}
-    </select>
-    <div class="two-fields" id="${prefix}OptionRow">
-      <div>
-        <label for="${prefix}Capacity">储存容量</label>
-        <select id="${prefix}Capacity">${options(["32","128"])}</select>
-      </div>
-      <div id="${prefix}FingerprintField">
-        <label for="${prefix}Fingerprint">指纹功能</label>
-        <select id="${prefix}Fingerprint">${options(["无指纹","指纹"])}</select>
-      </div>
-    </div>
-    <label for="${prefix}Channel">渠道</label>
-    <select id="${prefix}Channel" onchange="checkChannel('${prefix}')">
-      ${options(["阿冰","小四","鸿福","拍机堂","其他"])}
-    </select>
-    <div id="${prefix}CustomChannelBox" class="hidden">
-      <label for="${prefix}CustomChannel">其他渠道</label>
-      <input id="${prefix}CustomChannel" placeholder="请输入渠道名称">
-    </div>`;
-}
-
-$("orderProductFields").innerHTML=productFields("order");
-$("inventoryProductFields").innerHTML=productFields("inventory");
-
-function checkVersion(prefix){
-  const pure=value(prefix+"Version").includes("纯原");
-  $(prefix+"FingerprintField").classList.toggle("hidden",pure);
-  $(prefix+"OptionRow").classList.toggle("single",pure);
-  if(pure)$(prefix+"Fingerprint").value="";
-}
-
-function checkChannel(prefix){
-  const other=value(prefix+"Channel")==="其他";
-  $(prefix+"CustomChannelBox").classList.toggle("hidden",!other);
-  if(!other)$(prefix+"CustomChannel").value="";
-}
-
-function toggleOther(selectId,boxId){
-  $(boxId).classList.toggle("hidden",value(selectId)!=="其他");
-}
-
-function setProduct(prefix,item){
-  $(prefix+"Version").value=item.version||"";
-  $(prefix+"Capacity").value=item.capacity||"";
-  $(prefix+"Fingerprint").value=item.fingerprint==="不适用"?"":item.fingerprint||"";
-  const channel=item.channel==="阿宾"?"阿冰":item.channel||"";
-  const normal=["阿冰","小四","鸿福","拍机堂"];
-  $(prefix+"Channel").value=normal.includes(channel)?channel:channel?"其他":"";
-  $(prefix+"CustomChannel").value=normal.includes(channel)?"":channel;
-  checkVersion(prefix);
-  checkChannel(prefix);
-}
-
-function readProduct(prefix){
-  const version=value(prefix+"Version");
-  const capacity=value(prefix+"Capacity");
-  const fingerprint=value(prefix+"Fingerprint");
-  const selected=value(prefix+"Channel");
-  const channel=selected==="其他"?value(prefix+"CustomChannel"):selected;
-
-  if(!version||!capacity||!selected){
-    alert("请选择型号、容量和渠道");
-    return null;
-  }
-  if(!version.includes("纯原")&&!fingerprint){
-    alert("请选择指纹功能");
-    return null;
-  }
-  if(!channel){
-    alert("请输入其他渠道名称");
-    return null;
-  }
+let source=chooseSource();
+function keys(){return brand==='seven'?sevenKeys:sources[source]}
+function normalize(x){
   return {
-    version,capacity,channel,
-    fingerprint:version.includes("纯原")?"不适用":fingerprint
+    ...x,
+    trackingNumber:String(x.trackingNumber??x.tracking??''),
+    remark:String(x.remark??x.note??x.notes??''),
+    editHistory:Array.isArray(x.editHistory)?x.editHistory:Array.isArray(x.history)?x.history:[],
+    soldSeller:x.soldSeller??x.seller??'',
+    soldOrderNumber:String(x.soldOrderNumber??x.soldNo??x.no??''),
+    afterSalesDate:x.afterSalesDate??x.afterDate??'',
+    afterSalesReason:x.afterSalesReason??x.afterReason??x.why??''
   };
 }
-
-function readAmount(id,label){
-  const raw=value(id);
-  const number=Number(raw);
-  if(raw===""||!Number.isFinite(number)||number<0){
-    alert("请输入有效的"+label+"，不能为负数");
-    return null;
+function load(){
+  blocked=false;
+  db={o:[],i:[],s:[],a:[]};
+  for(const t of Object.keys(db)){
+    try{db[t]=read(keys()[t]).map(normalize)}
+    catch(e){blocked=true;notice('读取失败：'+e.message+'。已暂停保存，请保留浏览器数据。')}
   }
-  return Math.round(number*100)/100;
 }
-
-function calculateProfit(){
-  const cost=value("orderCost"),price=value("orderPrice");
-  $("orderProfit").value=cost!==""&&price!==""&&
-    Number.isFinite(Number(cost))&&Number.isFinite(Number(price))
-    ?profitOf({cost,price}).toFixed(2):"";
+function notice(text){
+  $('message').textContent=text;
+  $('message').classList.toggle('hidden',!text);
 }
-
-function saveOrder(){
-  const product=readProduct("order");
-  if(!product)return;
-  const cost=readAmount("orderCost","成本");
-  if(cost===null)return;
-  const price=readAmount("orderPrice","售价");
-  if(price===null)return;
-  const date=value("orderDate");
-  if(!date){alert("请选择日期");return;}
-
-  const editing=editingOrderId!==null;
-  const old=editing?orders.find(o=>sameId(o.id,editingOrderId)):null;
-  if(editing&&!old){alert("原订单不存在，请刷新页面");return;}
-
-  const editHistory=Array.isArray(old?.editHistory)?[...old.editHistory]:[];
-  if(editing){
-    const type=value("editType");
-    const reason=value("customEditReason");
-    if(!type){alert("请选择编辑类型：换货或其他");return;}
-    if(type==="其他"&&!reason){alert("请填写其他编辑说明");return;}
-    editHistory.push({
-      date:getToday(),type,
-      reason:type==="其他"?reason:"换货"
-    });
+function commit(next){
+  if(blocked){alert('数据读取异常，已暂停修改。');return false}
+  const ks=keys(),previous={};
+  try{
+    for(const t in next)previous[t]=localStorage.getItem(ks[t]);
+    for(const t in next)localStorage.setItem(ks[t],JSON.stringify(next[t]));
+  }catch(e){
+    try{
+      for(const t in previous){
+        if(previous[t]===null)localStorage.removeItem(ks[t]);
+        else localStorage.setItem(ks[t],previous[t]);
+      }
+    }catch{blocked=true}
+    alert('保存失败，当前表单保留。请检查浏览器存储空间。');
+    return false;
   }
-
-  const order={
-    ...(old||{}),
-    ...product,
-    id:old?old.id:uid(),
-    date,cost,price,
-    profit:profitOf({cost,price}).toFixed(2),
-    trackingNumber:value("trackingNumber"),
-    address:value("address"),
-    editHistory
-  };
-  const next=editing
-    ?orders.map(o=>sameId(o.id,old.id)?order:o)
-    :[order,...orders];
-
-  if(!persist([[orderKey,next]]))return;
-  orders=next;
-  resetOrderForm();
-  updateDateFilter();
-  renderOrders();
-  showPage("order-list");
+  Object.assign(db,next);
+  return true;
 }
-
-function editOrder(id){
-  const order=orders.find(o=>sameId(o.id,id));
-  if(!order)return;
-  editingOrderId=order.id;
-  setProduct("order",order);
-  $("orderDate").value=order.date||getToday();
-  $("trackingNumber").value=order.trackingNumber||"";
-  $("address").value=order.address||"";
-  $("orderCost").value=order.cost??"";
-  $("orderPrice").value=order.price??"";
-  ["editType","customEditReason","deleteReason","customDeleteReason"]
-    .forEach(id=>$(id).value="");
-  toggleOther("editType","customEditBox");
-  toggleOther("deleteReason","customDeleteBox");
-  calculateProfit();
-  $("orderFormTitle").textContent="编辑订单";
-  $("saveOrderButton").textContent="保存编辑";
-  $("orderEditPanel").classList.remove("hidden");
-  showPage("new-order");
+function leaveEdit(){
+  return !editing||confirm('离开编辑？尚未保存的修改将放弃，原记录保留。');
 }
-
-function deleteOrder(){
-  if(editingOrderId===null)return;
-  const selected=value("deleteReason");
-  const reason=selected==="其他"?value("customDeleteReason"):selected;
-  if(!selected){alert("请先选择删除原因");return;}
-  if(!reason){alert("请输入其他删除原因");return;}
-  const order=orders.find(o=>sameId(o.id,editingOrderId));
-  if(!order)return;
-  if(!confirm("确定将原订单移到售后吗？尚未保存的编辑内容不会写入。"))return;
-
-  const nextAfter=[{
-    ...order,
-    afterSalesId:uid(),
-    afterSalesDate:getToday(),
-    afterSalesReason:reason
-  },...afterSales];
-  const nextOrders=orders.filter(o=>!sameId(o.id,order.id));
-
-  /* 先保存售后，再移除订单 */
-  if(!persist([[afterSalesKey,nextAfter],[orderKey,nextOrders]]))return;
-  afterSales=nextAfter;
-  orders=nextOrders;
-  resetOrderForm();
-  updateDateFilter();
-  renderOrders();
-  renderAfterSales();
-  showPage("after-sales");
+function switchBrand(b){
+  if(!leaveEdit())return;
+  brand=b;editing=null;page=0;pending=null;search='';filterDate='all';
+  notice('');load();render();
 }
-
-function resetOrderForm(){
-  editingOrderId=null;
-  [
-    "orderVersion","orderCapacity","orderFingerprint",
-    "orderChannel","orderCustomChannel","trackingNumber","address",
-    "orderCost","orderPrice","orderProfit",
-    "editType","customEditReason","deleteReason","customDeleteReason"
-  ].forEach(id=>$(id).value="");
-  $("orderDate").value=getToday();
-  $("orderFormTitle").textContent="新增订单";
-  $("saveOrderButton").textContent="保存订单";
-  $("orderEditPanel").classList.add("hidden");
-  checkVersion("order");
-  checkChannel("order");
-  toggleOther("editType","customEditBox");
-  toggleOther("deleteReason","customDeleteBox");
+function go(p){
+  if(!leaveEdit())return;
+  editing=null;page=p;pending=null;render();
 }
-
-function updateDateFilter(){
-  const old=value("orderDateFilter")||"all";
-  const dates=[...new Set(orders.map(o=>o.date).filter(Boolean))].sort().reverse();
-  $("orderDateFilter").innerHTML='<option value="all">全部日期</option>'+
-    dates.map(d=>`<option value="${safeText(d)}">${safeText(d)}（${safeText(formatDate(d))}）</option>`).join("");
-  $("orderDateFilter").value=dates.includes(old)?old:"all";
+function render(){
+  $('title').textContent=(brand==='seven'?'7plus':'戴森')+'数据';
+  ['seven','dyson'].forEach(b=>$('brand-'+b).classList.toggle('active',b===brand));
+  $('tabs').innerHTML=names.map((n,i)=>`<button class="${i===page?'active':''}" onclick="go(${i})">${n}</button>`).join('');
+  const views=[formPage,orderPage,stockPage,afterPage,backupPage,importPage];
+  $('content').innerHTML=views[page]();
+  if(page===0||page===2)fillForm();
+  if(page===1)renderOrders();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-
-function orderMatchesSearch(order,search){
-  if(!search)return true;
-  const history=Array.isArray(order.editHistory)?order.editHistory:[];
-  const text=[
-    order.date,formatDate(order.date),productTitle(order),
-    order.channel,order.trackingNumber,order.address,
-    order.cost,order.price,profitOf(order),
-    ...history.map(h=>h.reason)
-  ].join(" ").toLowerCase();
-  return search.split(/\s+/).every(word=>text.includes(word));
+function select(id,label,items){
+  return `<label for="${id}">${label}</label><select id="${id}"><option value="">请选择</option>${items.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}</select>`;
 }
-
-function renderOrders(){
-  const date=value("orderDateFilter")||"all";
-  const search=value("orderSearch").toLowerCase();
-  const filtered=orders.filter(o=>
-    (date==="all"||o.date===date)&&orderMatchesSearch(o,search)
-  );
-
-  $("summaryCount").textContent=filtered.length;
-  $("summaryCost").textContent=money(filtered.reduce((s,o)=>s+Number(o.cost||0),0));
-  $("summaryPrice").textContent=money(filtered.reduce((s,o)=>s+Number(o.price||0),0));
-  const total=filtered.reduce((s,o)=>s+profitOf(o),0);
-  $("summaryProfit").textContent=money(total);
-  $("summaryProfit").className="summary-value "+profitClass(total);
-
-  if(!filtered.length){
-    $("orderList").innerHTML='<div class="empty">没有找到符合条件的订单。</div>';
-    return;
-  }
-  const groups=new Map();
-  filtered.forEach(o=>{
-    const key=o.date||"";
-    if(!groups.has(key))groups.set(key,[]);
-    groups.get(key).push(o);
-  });
-  $("orderList").innerHTML=[...groups.keys()].sort().reverse().map(day=>{
-    const items=groups.get(day);
-    const profit=items.reduce((s,o)=>s+profitOf(o),0);
-    return `<div class="date-group">
-      <div class="date-heading">
-        <span>${safeText(formatDate(day))}</span>
-        <span class="daily-profit ${profitClass(profit)}">当日利润：${money(profit)}</span>
-      </div>
-      ${items.map(orderCard).join("")}
-    </div>`;
-  }).join("");
+function input(id,label,type='text'){
+  return `<label for="${id}">${label}</label><input id="${id}" type="${type}" ${type==='number'?'min="0" step="0.01"':''}>`;
 }
-
-function addressBlock(address){
-  return `<details class="address-details">
-    <summary>查看收货地址</summary>
-    <div class="address-text">${safeText(address||"未填写")}</div>
-  </details>`;
+function area(id,label){
+  return `<label for="${id}">${label}</label><textarea id="${id}"></textarea>`;
 }
-
-function orderCard(order){
-  const history=Array.isArray(order.editHistory)?order.editHistory:[];
-  const latest=history[history.length-1];
-  const editNote=latest?`<div class="edit-note">
-    最近编辑：${safeText(latest.type==="自定义"?"其他":latest.type)}
-    · ${safeText(latest.reason)}
-  </div>`:"";
-  const profit=profitOf(order);
-  return `<div class="compact-card">
-    <div class="compact-top">
-      <div class="item-title">${safeText(productTitle(order))}</div>
-      <strong class="${profitClass(profit)}">${money(profit)}</strong>
+function productForm(){
+  if(brand==='dyson')return select('model','型号',models);
+  return select('version','网络和版本',versions)+
+    `<div class="row" id="optionRow"><div>${select('capacity','储存容量',['32','128'])}</div><div id="fingerBox">${select('fingerprint','指纹功能',['无指纹','指纹'])}</div></div>`+
+    select('channel','渠道',[...channels,'其他'])+
+    `<div id="channelBox" class="hidden">${input('customChannel','其他渠道')}</div>`;
+}
+function formPage(stock=false){
+  const edit=editing&&editing.type===(stock?'i':'o');
+  return `<div class="box">
+    <h2>${edit?'编辑':stock?'新增':'新增'}${stock?'库存':'订单'}</h2>
+    ${stock?'':input('date','日期','date')}
+    ${productForm()}
+    ${stock&&brand==='dyson'?select('channel','渠道',[...channels,'其他'])+`<div id="channelBox" class="hidden">${input('customChannel','其他渠道')}</div>`:''}
+    ${stock?'':input('trackingNumber','快递单号')+area('address','收货地址')}
+    <div class="${stock?'':'row'}">
+      <div>${input('cost','成本','number')}</div>
+      ${stock?'':`<div>${input('price','售价','number')}</div>`}
     </div>
-    <div class="meta-line">${safeText(formatDate(order.date))}
-      · ${safeText(order.channel||"未填写渠道")}</div>
-    <div class="meta-line">单号：${safeText(order.trackingNumber||"未填写")}</div>
-    <div class="money-line">成本 ${money(order.cost)} · 售价 ${money(order.price)}</div>
-    ${editNote}
-    ${addressBlock(order.address)}
-    ${actionButton("编辑订单","editOrder",order.id)}
+    ${stock?'':`<label>利润</label><input id="profit" readonly style="background:#eef4ff;color:#2563eb">`}
+    ${area('remark','备注')}
+    ${edit&&!stock?`
+      ${select('editType','本次编辑类型',['换货','其他'])}
+      <div id="editOther" class="hidden">${input('editReason','其他编辑说明')}</div>
+      ${select('deleteType','删除原因',['退货','其他'])}
+      <div id="deleteOther" class="hidden">${input('deleteReason','其他删除原因')}</div>
+      <button class="wide danger" onclick="removeOrder()">删除订单并转到售后</button>
+    `:''}
+    <button class="wide primary" onclick="saveForm(${stock})">${edit?'保存编辑':stock?'添加库存':'保存订单'}</button>
+    ${edit&&stock?`
+      <h3>售出信息</h3><div class="row"><div>${input('seller','销售人')}</div><div>${input('soldNo','单号')}</div></div>
+      <button class="wide edit" onclick="sellStock()">标记为已售出</button>
+    `:''}
   </div>`;
 }
-
-/* 库存 */
-function readInventoryForm(){
-  const product=readProduct("inventory");
-  if(!product)return null;
-  const cost=readAmount("inventoryCost","库存成本");
-  if(cost===null)return null;
-  return {...product,cost,remark:value("inventoryRemark")};
+function set(id,v){
+  const el=$(id);if(!el)return;
+  if(el.tagName==='SELECT'&&v!==undefined&&v!==null&&v!==''&&!Array.from(el.options).some(o=>o.value===String(v)))
+    el.add(new Option(String(v),String(v)));
+  el.value=v??'';
 }
-
-function saveInventory(){
-  const fields=readInventoryForm();
-  if(!fields)return;
-  const editing=editingInventoryId!==null;
-  const old=editing?inventory.find(i=>sameId(i.id,editingInventoryId)):null;
-  if(editing&&!old){alert("原库存不存在，请刷新页面");return;}
-
-  const item={
-    ...(old||{}),...fields,
-    id:old?old.id:uid()
-  };
-  const next=editing
-    ?inventory.map(i=>sameId(i.id,item.id)?item:i)
-    :[item,...inventory];
-  if(!persist([[inventoryKey,next]]))return;
-  inventory=next;
-  resetInventoryForm();
-  renderInventory();
-}
-
-function editInventory(id){
-  const item=inventory.find(i=>sameId(i.id,id));
-  if(!item)return;
-  editingInventoryId=item.id;
-  setProduct("inventory",item);
-  $("inventoryCost").value=item.cost??"";
-  $("inventoryRemark").value=item.remark??item.notes??"";
-  $("soldSeller").value="";
-  $("soldOrderNumber").value="";
-  $("inventoryFormTitle").textContent="编辑库存";
-  $("saveInventoryButton").textContent="保存修改";
-  $("soldBox").classList.remove("hidden");
-  $("inventoryFormBox").scrollIntoView({behavior:"smooth"});
-}
-
-function markInventorySold(){
-  if(editingInventoryId===null)return;
-  const seller=value("soldSeller");
-  const number=value("soldOrderNumber");
-  if(!seller){alert("请先填写销售人");return;}
-  if(!number){alert("请先填写单号");return;}
-
-  const fields=readInventoryForm();
-  if(!fields)return;
-  const item=inventory.find(i=>sameId(i.id,editingInventoryId));
-  if(!item)return;
-  if(!confirm("确定标记为已售出吗？当前修改和备注会一起保存。"))return;
-
-  const nextSold=[{
-    ...item,...fields,
-    soldSeller:seller,
-    soldOrderNumber:number,
-    soldDate:getToday()
-  },...soldInventory];
-  const nextInventory=inventory.filter(i=>!sameId(i.id,item.id));
-  if(!persist([[soldKey,nextSold],[inventoryKey,nextInventory]]))return;
-
-  soldInventory=nextSold;
-  inventory=nextInventory;
-  resetInventoryForm();
-  renderInventory();
-  renderSoldInventory();
-}
-
-function deleteSoldInventory(id){
-  const index=soldInventory.findIndex(i=>sameId(i.id,id));
-  if(index<0)return;
-  if(!confirm("永久删除这条已售出记录？删除后无法在页面恢复，库存不会增加。"))return;
-  const next=soldInventory.filter((_,i)=>i!==index);
-  if(!persist([[soldKey,next]]))return;
-  soldInventory=next;
-  renderSoldInventory();
-}
-
-function resetInventoryForm(){
-  editingInventoryId=null;
-  [
-    "inventoryVersion","inventoryCapacity","inventoryFingerprint",
-    "inventoryChannel","inventoryCustomChannel","inventoryCost",
-    "inventoryRemark","soldSeller","soldOrderNumber"
-  ].forEach(id=>$(id).value="");
-  $("inventoryFormTitle").textContent="新增库存";
-  $("saveInventoryButton").textContent="添加库存";
-  $("soldBox").classList.add("hidden");
-  checkVersion("inventory");
-  checkChannel("inventory");
-}
-
-function remarkBlock(item){
-  const remark=item.remark??item.notes??"";
-  return remark?`<div class="meta-line remark">备注：${safeText(remark)}</div>`:"";
-}
-
-function renderInventory(){
-  $("inventoryCount").textContent=inventory.length;
-  $("inventoryTotalCost").textContent=money(
-    inventory.reduce((s,i)=>s+Number(i.cost||0),0)
-  );
-  $("inventoryList").innerHTML=inventory.length?inventory.map(item=>`
-    <div class="compact-card">
-      <div class="compact-top">
-        <div class="item-title">${safeText(productTitle(item))}</div>
-        <strong>${money(item.cost)}</strong>
-      </div>
-      <div class="meta-line">渠道：${safeText(item.channel||"未填写")}</div>
-      ${remarkBlock(item)}
-      ${actionButton("编辑库存 / 标记售出","editInventory",item.id)}
-    </div>
-  `).join(""):'<div class="empty">暂时还没有库存记录。</div>';
-}
-
-function renderSoldInventory(){
-  $("soldInventoryList").innerHTML=soldInventory.length?soldInventory.map(item=>`
-    <div class="compact-card sold-card">
-      <div class="compact-top">
-        <div class="item-title">${safeText(productTitle(item))}</div>
-        <strong>已售出</strong>
-      </div>
-      <div class="meta-line">售出日期：${safeText(formatDate(item.soldDate))}</div>
-      <div class="meta-line">销售人：${safeText(item.soldSeller||"旧记录未填写")}</div>
-      <div class="meta-line">单号：${safeText(item.soldOrderNumber||"未填写")}</div>
-      <div class="meta-line">渠道：${safeText(item.channel||"未填写")} · 成本：${money(item.cost)}</div>
-      ${remarkBlock(item)}
-      ${actionButton("删除已售出记录","deleteSoldInventory",item.id,"small-delete-button")}
-    </div>
-  `).join(""):'<div class="empty">暂时还没有已售出记录。</div>';
-}
-
-/* 售后：兼容旧记录没有 afterSalesId 的情况 */
-function afterId(item,index){
-  return item.afterSalesId||"legacy-"+index;
-}
-
-function deleteAfterSales(id){
-  const index=afterSales.findIndex((item,i)=>sameId(afterId(item,i),id));
-  if(index<0)return;
-  if(!confirm("永久删除这条售后记录？删除后无法在页面恢复，也不会恢复原订单。"))return;
-
-  const next=afterSales.filter((_,i)=>i!==index);
-  if(!persist([[afterSalesKey,next]]))return;
-  afterSales=next;
-  renderAfterSales();
-}
-
-function renderAfterSales(){
-  $("afterSalesCount").textContent=afterSales.length;
-  $("afterSalesList").innerHTML=afterSales.length?afterSales.map((order,index)=>`
-    <div class="compact-card after-card">
-      <div class="compact-top">
-        <div class="item-title">${safeText(productTitle(order))}</div>
-        <strong>${safeText(order.afterSalesReason||"未填写原因")}</strong>
-      </div>
-      <div class="meta-line">售后日期：${safeText(formatDate(order.afterSalesDate))}</div>
-      <div class="meta-line">原订单日期：${safeText(formatDate(order.date))}</div>
-      <div class="meta-line">渠道：${safeText(order.channel||"未填写")}</div>
-      <div class="meta-line">快递单号：${safeText(order.trackingNumber||"未填写")}</div>
-      <div class="money-line">
-        成本 ${money(order.cost)} · 售价 ${money(order.price)}
-        · 原订单利润 ${money(profitOf(order))}
-      </div>
-      ${addressBlock(order.address)}
-      ${actionButton("删除售后记录","deleteAfterSales",afterId(order,index),"small-delete-button")}
-    </div>
-  `).join(""):'<div class="empty">暂时还没有售后记录。</div>';
-}
-
-resetOrderForm();
-resetInventoryForm();
-updateDateFilter();
-renderOrders();
-renderInventory();
-renderSoldInventory();
-renderAfterSales();
-</script>
-<!-- 数据备份、六位密码与 Face ID / 指纹解锁：开始 -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
-<style>
-#securityLock{
-  position:fixed;inset:0;z-index:9999;background:#f5f7fb;
-  display:flex;align-items:center;justify-content:center;padding:20px
-}
-.lock-card{
-  width:100%;max-width:410px;background:#fff;border-radius:20px;
-  padding:24px;box-shadow:0 14px 45px rgba(15,23,42,.16)
-}
-.lock-card h2{margin:0 0 8px;color:#2563eb}
-.lock-card p{line-height:1.6}
-.lock-card input{letter-spacing:7px;text-align:center;font-size:24px}
-.lock-card button{width:100%;margin-top:12px}
-.lock-primary{background:#2563eb;color:#fff}
-.lock-secondary{background:#eef4ff;color:#2563eb}
-.backup-note{
-  margin-top:12px;padding:11px;border-radius:9px;
-  background:#fff7ed;color:#9a3412;font-size:14px;line-height:1.55
-}
-.backup-status{
-  margin-top:12px;padding:11px;border-radius:9px;
-  background:#f0fdf4;color:#166534;font-size:14px
-}
-</style>
-
-<div id="securityLock"></div>
-
-<script>
-(function(){
-  const SECURITY_KEY="xianyuSecurityV1";
-  const BACKUP_TIME_KEY="xianyuLastBackupTime";
-
-  function el(id){return document.getElementById(id)}
-  function getData(key){
-    try{
-      const data=JSON.parse(localStorage.getItem(key)||"[]");
-      return Array.isArray(data)?data:[];
-    }catch(error){
-      return [];
-    }
+function fillForm(){
+  const stock=page===2;
+  const x=editing?db[editing.type][editing.index]:{};
+  ['version','model','capacity','fingerprint','trackingNumber','address','cost','price','remark'].forEach(k=>set(k,x[k]));
+  set('date',x.date||today());
+  if($('channel')){
+    const ch=x.channel==='阿宾'?'阿冰':x.channel||'';
+    set('channel',channels.includes(ch)?ch:ch?'其他':'');
+    set('customChannel',channels.includes(ch)?'':ch);
+    $('channel').onchange=()=>toggle('channelBox',val('channel')==='其他');
+    $('channel').onchange();
   }
-  function saveData(key,data){
-    localStorage.setItem(key,JSON.stringify(data));
-  }
-  function text(value){
-    return String(value??"").replace(/[&<>"']/g,function(char){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char];
-    });
-  }
-  function formatBackupTime(time){
-    if(!time)return"尚未备份";
-    const date=new Date(time);
-    if(isNaN(date.getTime()))return"尚未备份";
-    return date.getFullYear()+"年"+
-      (date.getMonth()+1)+"月"+
-      date.getDate()+"日 "+
-      String(date.getHours()).padStart(2,"0")+":"+
-      String(date.getMinutes()).padStart(2,"0");
-  }
-  function getSecurity(){
-    try{
-      return JSON.parse(localStorage.getItem(SECURITY_KEY)||"{}")||{};
-    }catch(error){
-      return {};
-    }
-  }
-  function saveSecurity(data){
-    localStorage.setItem(SECURITY_KEY,JSON.stringify(data));
-  }
-  async function hashPin(pin){
-    const bytes=new TextEncoder().encode(pin);
-    const digest=await crypto.subtle.digest("SHA-256",bytes);
-    return Array.from(new Uint8Array(digest))
-      .map(function(byte){return byte.toString(16).padStart(2,"0")})
-      .join("");
-  }
-  function randomBytes(length){
-    const bytes=new Uint8Array(length);
-    crypto.getRandomValues(bytes);
-    return bytes;
-  }
-  function toBase64(buffer){
-    const bytes=new Uint8Array(buffer);
-    let binary="";
-    bytes.forEach(function(byte){binary+=String.fromCharCode(byte)});
-    return btoa(binary);
-  }
-  function fromBase64(base64){
-    const binary=atob(base64);
-    const bytes=new Uint8Array(binary.length);
-    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
-    return bytes;
-  }
-
-  /* 将原来的“自定义”显示成“其他”，保留原功能 */
-  const editSelect=el("editType");
-  if(editSelect){
-    Array.from(editSelect.options).forEach(function(option){
-      if(option.value==="自定义"){
-        option.textContent="其他";
-      }
-    });
-  }
-  const customEditLabel=document.querySelector('label[for="customEditReason"]');
-  if(customEditLabel)customEditLabel.textContent="其他编辑说明";
-
-  /* 增加“备份”页面 */
-  const tabs=document.querySelector(".tabs");
-  if(tabs&&!el("tab-backup")){
-    tabs.style.gridTemplateColumns="repeat(5,1fr)";
-    const button=document.createElement("button");
-    button.id="tab-backup";
-    button.className="tab-button";
-    button.textContent="备份";
-    button.onclick=function(){showPage("backup")};
-    tabs.appendChild(button);
-
-    const page=document.createElement("section");
-    page.id="page-backup";
-    page.className="page";
-    page.innerHTML=`
-      <div class="box">
-        <h2>数据备份</h2>
-        <p>导出后请在 iPhone 的下载处选择“存储到文件”，建议保存到 iCloud Drive。</p>
-
-        <div class="summary-grid">
-          <div class="summary-card">
-            <div class="summary-label">订单</div>
-            <div class="summary-value" id="backupOrderCount">0</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">库存</div>
-            <div class="summary-value" id="backupInventoryCount">0</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">已售出</div>
-            <div class="summary-value" id="backupSoldCount">0</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">售后</div>
-            <div class="summary-value" id="backupAfterCount">0</div>
-          </div>
-        </div>
-
-        <div class="backup-status" id="backupTime">上次备份：尚未备份</div>
-
-        <button class="primary-button" onclick="exportXianyuExcel()">
-          导出 Excel 备份
-        </button>
-
-        <label for="importExcelFile">从 Excel 恢复数据</label>
-        <input id="importExcelFile" type="file"
-          accept=".xlsx,.xls"
-          onchange="importXianyuExcel(event)">
-
-        <div class="backup-note">
-          导入会用备份文件中的订单、库存、已售出和售后记录替换当前网页数据。请先导出一份最新备份再恢复。
-        </div>
-      </div>
-
-      <div class="box">
-        <h2>页面解锁</h2>
-        <p>六位密码只保存在当前手机浏览器。换手机或清除浏览器数据后，需要重新设置。</p>
-
-        <button class="primary-button" onclick="bindBiometric()">
-          绑定 Face ID / 指纹解锁
-        </button>
-
-        <div class="backup-note">
-          Face ID / 指纹由 iPhone 系统验证，网页不会读取你的脸部或指纹信息。
-        </div>
-
-        <button class="delete-button" onclick="changeAppPassword()">
-          修改六位密码
-        </button>
-      </div>
-    `;
-    document.querySelector("main").appendChild(page);
-  }
-
-  function renderBackupInfo(){
-    const orders=getData("xianyuOrders");
-    const inventory=getData("xianyuInventory");
-    const sold=getData("xianyuSoldInventory");
-    const afterSales=getData("xianyuAfterSales");
-
-    if(el("backupOrderCount"))el("backupOrderCount").textContent=orders.length;
-    if(el("backupInventoryCount"))el("backupInventoryCount").textContent=inventory.length;
-    if(el("backupSoldCount"))el("backupSoldCount").textContent=sold.length;
-    if(el("backupAfterCount"))el("backupAfterCount").textContent=afterSales.length;
-
-    if(el("backupTime")){
-      el("backupTime").textContent=
-        "上次备份："+formatBackupTime(localStorage.getItem(BACKUP_TIME_KEY));
-    }
-  }
-
-  window.exportXianyuExcel=function(){
-    if(!window.XLSX){
-      alert("Excel 功能正在加载，请检查网络后稍等几秒再试。");
-      return;
-    }
-
-    const orders=getData("xianyuOrders");
-    const inventory=getData("xianyuInventory");
-    const sold=getData("xianyuSoldInventory");
-    const afterSales=getData("xianyuAfterSales");
-
-    const orderRows=orders.map(function(item){
-      return {
-        "编号":item.id||"",
-        "日期":item.date||"",
-        "网络和版本":item.version||"",
-        "容量":item.capacity||"",
-        "指纹":item.fingerprint||"",
-        "渠道":item.channel||"",
-        "快递单号":item.trackingNumber||"",
-        "收货地址":item.address||"",
-        "成本":item.cost||"",
-        "售价":item.price||"",
-        "利润":item.profit||"",
-        "编辑记录":JSON.stringify(item.editHistory||[])
-      };
-    });
-
-    const inventoryRows=inventory.map(function(item){
-      return {
-        "编号":item.id||"",
-        "网络和版本":item.version||"",
-        "容量":item.capacity||"",
-        "指纹":item.fingerprint||"",
-        "渠道":item.channel||"",
-        "成本":item.cost||"",
-        "备注":item.remark||item.notes||""
-      };
-    });
-
-    const soldRows=sold.map(function(item){
-      return {
-        "编号":item.id||"",
-        "售出日期":item.soldDate||"",
-        "销售人":item.soldSeller||"",
-        "单号":item.soldOrderNumber||"",
-        "网络和版本":item.version||"",
-        "容量":item.capacity||"",
-        "指纹":item.fingerprint||"",
-        "渠道":item.channel||"",
-        "成本":item.cost||"",
-        "备注":item.remark||item.notes||""
-      };
-    });
-
-    const afterRows=afterSales.map(function(item){
-      return {
-        "售后编号":item.afterSalesId||"",
-        "原订单编号":item.id||"",
-        "售后日期":item.afterSalesDate||"",
-        "售后原因":item.afterSalesReason||"",
-        "原订单日期":item.date||"",
-        "网络和版本":item.version||"",
-        "容量":item.capacity||"",
-        "指纹":item.fingerprint||"",
-        "渠道":item.channel||"",
-        "快递单号":item.trackingNumber||"",
-        "收货地址":item.address||"",
-        "成本":item.cost||"",
-        "售价":item.price||"",
-        "利润":item.profit||""
-      };
-    });
-
-    const book=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(book,XLSX.utils.json_to_sheet(orderRows),"订单明细");
-    XLSX.utils.book_append_sheet(book,XLSX.utils.json_to_sheet(inventoryRows),"库存");
-    XLSX.utils.book_append_sheet(book,XLSX.utils.json_to_sheet(soldRows),"已售出");
-    XLSX.utils.book_append_sheet(book,XLSX.utils.json_to_sheet(afterRows),"售后");
-
-    const today=new Date();
-    const filename="闲鱼数据备份_"+
-      today.getFullYear()+
-      String(today.getMonth()+1).padStart(2,"0")+
-      String(today.getDate()).padStart(2,"0")+".xlsx";
-
-    try{
-      XLSX.writeFile(book,filename);
-      localStorage.setItem(BACKUP_TIME_KEY,new Date().toISOString());
-      renderBackupInfo();
-      alert("Excel 已生成。请到 Safari 下载处选择“存储到文件”。");
-    }catch(error){
-      alert("导出失败，请稍后重试。");
-    }
-  };
-
-  function rowsFromSheet(book,name){
-    if(!book.Sheets[name])return [];
-    return XLSX.utils.sheet_to_json(book.Sheets[name],{defval:""});
-  }
-  function parseHistory(value){
-    try{
-      const data=JSON.parse(value||"[]");
-      return Array.isArray(data)?data:[];
-    }catch(error){
-      return [];
-    }
-  }
-
-  window.importXianyuExcel=function(event){
-    const file=event.target.files&&event.target.files[0];
-    if(!file)return;
-
-    if(!window.XLSX){
-      alert("Excel 功能正在加载，请检查网络后重试。");
-      event.target.value="";
-      return;
-    }
-
-    if(!confirm("导入会替换现在网页中的全部订单、库存、已售出和售后数据。确定继续吗？")){
-      event.target.value="";
-      return;
-    }
-
-    const reader=new FileReader();
-    reader.onload=function(loadEvent){
-      try{
-        const book=XLSX.read(loadEvent.target.result,{type:"array"});
-
-        const orders=rowsFromSheet(book,"订单明细").map(function(row){
-          return {
-            id:row["编号"]||Date.now()+"-"+Math.random(),
-            date:String(row["日期"]||""),
-            version:row["网络和版本"]||"",
-            capacity:String(row["容量"]||""),
-            fingerprint:row["指纹"]||"",
-            channel:row["渠道"]||"",
-            trackingNumber:String(row["快递单号"]||""),
-            address:row["收货地址"]||"",
-            cost:row["成本"]||"",
-            price:row["售价"]||"",
-            profit:row["利润"]||"",
-            editHistory:parseHistory(row["编辑记录"])
-          };
-        });
-
-        const inventory=rowsFromSheet(book,"库存").map(function(row){
-          return {
-            id:row["编号"]||Date.now()+"-"+Math.random(),
-            version:row["网络和版本"]||"",
-            capacity:String(row["容量"]||""),
-            fingerprint:row["指纹"]||"",
-            channel:row["渠道"]||"",
-            cost:row["成本"]||"",
-            remark:row["备注"]||""
-          };
-        });
-
-        const sold=rowsFromSheet(book,"已售出").map(function(row){
-          return {
-            id:row["编号"]||Date.now()+"-"+Math.random(),
-            soldDate:String(row["售出日期"]||""),
-            soldSeller:row["销售人"]||"",
-            soldOrderNumber:String(row["单号"]||""),
-            version:row["网络和版本"]||"",
-            capacity:String(row["容量"]||""),
-            fingerprint:row["指纹"]||"",
-            channel:row["渠道"]||"",
-            cost:row["成本"]||"",
-            remark:row["备注"]||""
-          };
-        });
-
-        const afterSales=rowsFromSheet(book,"售后").map(function(row){
-          return {
-            afterSalesId:row["售后编号"]||Date.now()+"-"+Math.random(),
-            id:row["原订单编号"]||"",
-            afterSalesDate:String(row["售后日期"]||""),
-            afterSalesReason:row["售后原因"]||"",
-            date:String(row["原订单日期"]||""),
-            version:row["网络和版本"]||"",
-            capacity:String(row["容量"]||""),
-            fingerprint:row["指纹"]||"",
-            channel:row["渠道"]||"",
-            trackingNumber:String(row["快递单号"]||""),
-            address:row["收货地址"]||"",
-            cost:row["成本"]||"",
-            price:row["售价"]||"",
-            profit:row["利润"]||""
-          };
-        });
-
-        saveData("xianyuOrders",orders);
-        saveData("xianyuInventory",inventory);
-        saveData("xianyuSoldInventory",sold);
-        saveData("xianyuAfterSales",afterSales);
-
-        alert("恢复成功，网页将自动刷新。");
-        location.reload();
-      }catch(error){
-        alert("导入失败。请确认选择的是本网页导出的 Excel 备份文件。");
-        event.target.value="";
-      }
+  if($('version')){
+    $('version').onchange=()=>{
+      const pure=val('version').includes('纯原');
+      toggle('fingerBox',!pure);
+      $('optionRow').style.gridTemplateColumns=pure?'1fr':'1fr 1fr';
+      if(pure)set('fingerprint','');
     };
-    reader.readAsArrayBuffer(file);
-  };
-
-  function lockHtml(isSetup){
-    const security=getSecurity();
-    const faceButton=security.credentialId?`
-      <button id="faceUnlock" class="lock-secondary">
-        Face ID / 指纹解锁
-      </button>`:"";
-
-    return `
-      <div class="lock-card">
-        <h2>${isSetup?"设置页面密码":"闲鱼数据记录"}</h2>
-        <p>${isSetup
-          ?"请设置六位数字密码。它用于保护这台手机浏览器里的订单和地址。"
-          :"请输入六位密码后查看数据。"}
-        </p>
-
-        <input id="lockPin" type="password" inputmode="numeric"
-          maxlength="6" autocomplete="off"
-          placeholder="请输入六位密码">
-
-        ${isSetup?`
-          <input id="lockPinAgain" type="password" inputmode="numeric"
-            maxlength="6" autocomplete="off"
-            placeholder="再次输入六位密码"
-            style="margin-top:10px">
-        `:""}
-
-        <button id="pinUnlock" class="lock-primary">
-          ${isSetup?"设置密码并进入":"密码解锁"}
-        </button>
-        ${faceButton}
-
-        <p class="hint">
-          密码只保存在当前浏览器。请不要清除 Safari 网站数据。
-        </p>
-      </div>`;
+    $('version').onchange();
   }
-
-  function unlock(){
-    el("securityLock").style.display="none";
-    renderBackupInfo();
+  if(!stock){
+    $('cost').oninput=$('price').oninput=calc;
+    calc();
   }
-
-  async function renderLock(){
-    const security=getSecurity();
-    const first=!security.pinHash;
-    el("securityLock").innerHTML=lockHtml(first);
-
-    el("pinUnlock").onclick=async function(){
-      const pin=el("lockPin").value.trim();
-
-      if(!/^\d{6}$/.test(pin)){
-        alert("请输入六位数字密码");
-        return;
-      }
-
-      if(first){
-        const again=el("lockPinAgain").value.trim();
-        if(pin!==again){
-          alert("两次密码不一致");
-          return;
-        }
-        security.pinHash=await hashPin(pin);
-        saveSecurity(security);
-        unlock();
-        return;
-      }
-
-      if(await hashPin(pin)===security.pinHash){
-        unlock();
-      }else{
-        alert("密码不正确");
-        el("lockPin").value="";
-      }
-    };
-
-    const faceButton=el("faceUnlock");
-    if(faceButton){
-      faceButton.onclick=unlockByBiometric;
-    }
+  if($('editType')){
+    $('editType').onchange=()=>toggle('editOther',val('editType')==='其他');
+    $('deleteType').onchange=()=>toggle('deleteOther',val('deleteType')==='其他');
   }
-
-  async function unlockByBiometric(){
-    const security=getSecurity();
-
-    if(!security.credentialId||!navigator.credentials){
-      alert("此设备尚未绑定 Face ID / 指纹。");
-      return;
-    }
-
-    try{
-      const result=await navigator.credentials.get({
-        publicKey:{
-          challenge:randomBytes(32),
-          allowCredentials:[{
-            type:"public-key",
-            id:fromBase64(security.credentialId)
-          }],
-          userVerification:"required",
-          timeout:60000
-        }
-      });
-
-      if(toBase64(result.rawId)!==security.credentialId){
-        alert("解锁设备不匹配。");
-        return;
-      }
-
-      unlock();
-    }catch(error){
-      alert("Face ID / 指纹验证未完成，请改用六位密码解锁。");
-    }
+}
+function toggle(id,show){$(id).classList.toggle('hidden',!show)}
+function calc(){
+  $('profit').value=val('cost')!==''&&val('price')!==''?profit({cost:val('cost'),price:val('price')}).toFixed(2):'';
+}
+function amount(id){
+  const s=val(id),n=Number(s);
+  if(!s||!Number.isFinite(n)||n<0)throw Error('请填写有效的'+(id==='cost'?'成本':'售价'));
+  return Math.round(n*100)/100;
+}
+function formData(stock){
+  const x={cost:amount('cost'),remark:val('remark')};
+  if(brand==='dyson'){
+    x.model=val('model');
+    if(!models.includes(x.model))throw Error('请选择戴森型号');
+  }else{
+    x.version=val('version');x.capacity=val('capacity');
+    x.fingerprint=x.version.includes('纯原')?'不适用':val('fingerprint');
+    if(!x.version||!x.capacity||!x.fingerprint)throw Error('请填写型号、容量和指纹功能');
   }
-
-  window.bindBiometric=async function(){
-    if(!navigator.credentials||!window.PublicKeyCredential){
-      alert("当前浏览器不支持 Face ID / 指纹网页解锁。请使用 Safari 打开网页。");
-      return;
-    }
-
-    try{
-      const credential=await navigator.credentials.create({
-        publicKey:{
-          challenge:randomBytes(32),
-          rp:{name:"闲鱼数据记录"},
-          user:{
-            id:randomBytes(16),
-            name:"本机用户",
-            displayName:"本机用户"
-          },
-          pubKeyCredParams:[
-            {type:"public-key",alg:-7},
-            {type:"public-key",alg:-257}
-          ],
-          authenticatorSelection:{
-            authenticatorAttachment:"platform",
-            userVerification:"required",
-            residentKey:"preferred"
-          },
-          timeout:60000,
-          attestation:"none"
-        }
-      });
-
-      const security=getSecurity();
-      security.credentialId=toBase64(credential.rawId);
-      saveSecurity(security);
-      alert("Face ID / 指纹已绑定。下次打开网页可直接验证解锁。");
-    }catch(error){
-      alert("绑定没有完成。请确认使用 Safari，并已在 iPhone 设置中启用 Face ID 或指纹。");
-    }
-  };
-
-  window.changeAppPassword=async function(){
-    const oldPin=prompt("请输入当前六位密码");
-    if(oldPin===null)return;
-
-    const security=getSecurity();
-    if(!/^\d{6}$/.test(oldPin)||await hashPin(oldPin)!==security.pinHash){
-      alert("当前密码不正确。");
-      return;
-    }
-
-    const newPin=prompt("请输入新的六位数字密码");
-    if(newPin===null)return;
-
-    if(!/^\d{6}$/.test(newPin)){
-      alert("新密码必须是六位数字。");
-      return;
-    }
-
-    const again=prompt("请再次输入新的六位数字密码");
-    if(newPin!==again){
-      alert("两次密码不一致。");
-      return;
-    }
-
-    security.pinHash=await hashPin(newPin);
-    saveSecurity(security);
-    alert("密码修改成功。");
-  };
-
-  renderLock();
-  renderBackupInfo();
-})();
-</script>
-<!-- 数据备份、六位密码与 Face ID / 指纹解锁：结束 -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
-<script>
-(function(){
-  const tabBox=document.querySelector('.tabs');
-  if(!tabBox||document.getElementById('tab-import-orders'))return;
-
-  tabBox.style.gridTemplateColumns='repeat(3,1fr)';
-
-  const tab=document.createElement('button');
-  tab.id='tab-import-orders';
-  tab.className='tab-button';
-  tab.textContent='数据导入';
-  tab.onclick=function(){showPage('import-orders')};
-  tabBox.appendChild(tab);
-
-  const page=document.createElement('section');
-  page.id='page-import-orders';
-  page.className='page';
-  page.innerHTML=`
-    <div class="box">
-      <h2>订单数据导入</h2>
-      <p>选择 Excel 后，会自动生成订单并追加到订单明细，不会删除原有订单。</p>
-
-      <label>导入订单日期</label>
-      <input id="importOrderDate" type="date">
-
-      <label>选择 Excel 文件</label>
-      <input id="importOrderFile" type="file" accept=".xlsx,.xls"
-        onchange="readImportOrders(event)">
-
-      <div id="importOrderInfo" class="empty">还没有选择文件。</div>
-
-      <button class="primary-button" onclick="saveImportedOrders()">
-        生成并导入订单
-      </button>
-    </div>
-  `;
-  document.querySelector('main').appendChild(page);
-
-  const now=new Date();
-  document.getElementById('importOrderDate').value=
-    now.getFullYear()+'-'+
-    String(now.getMonth()+1).padStart(2,'0')+'-'+
-    String(now.getDate()).padStart(2,'0');
-
-  let pending=[];
-
-  function modelInfo(raw){
-    raw=String(raw||'').trim();
-
-    let version='未识别';
-
-    if(raw.includes('无锁')&&raw.includes('纯原')&&raw.includes('插卡')){
-      version='无锁纯原插卡';
-    }else if(raw.includes('无锁')&&raw.includes('纯原')){
-      version='无锁纯原Wi-Fi';
-    }else if(raw.includes('无锁')&&raw.includes('插卡')){
-      version='无锁插卡';
-    }else if(raw.includes('无锁')){
-      version='无锁Wi-Fi';
-    }else if(raw.includes('插卡')){
-      version='插卡';
-    }else if(raw.includes('Wi-Fi')){
-      version='Wi-Fi';
-    }
-
-    const capacity=['256','128','64','32'].find(function(v){
-      return raw.includes(v);
-    })||'';
-
-    let fingerprint=raw.includes('无指纹')
-      ?'无指纹'
-      :(raw.includes('指纹')?'指纹':'');
-
-    if(version.includes('纯原')){
-      fingerprint='不适用';
-    }
-
-    return{
-      version:version,
-      capacity:capacity,
-      fingerprint:fingerprint,
-      raw:raw
-    };
+  if($('channel')){
+    x.channel=val('channel')==='其他'?val('customChannel'):val('channel');
+    if(!x.channel)throw Error('请填写渠道');
   }
-
-  function text(v){
-    return String(v??'').trim();
+  if(!stock){
+    x.date=val('date');x.price=amount('price');
+    if(!x.date)throw Error('请选择日期');
+    x.trackingNumber=val('trackingNumber');x.address=val('address');
+    x.profit=profit(x).toFixed(2);
   }
-
-  function number(v){
-    const n=Number(v);
-    return Number.isFinite(n)?n:0;
-  }
-
-  function history(v){
-    try{
-      const result=JSON.parse(v);
-      return Array.isArray(result)?result:[];
-    }catch(e){
-      return [];
-    }
-  }
-
-  window.readImportOrders=function(event){
-    const file=event.target.files&&event.target.files[0];
-
-    if(!file)return;
-
-    if(!window.XLSX){
-      alert('Excel 功能正在加载，请等几秒后重新选择文件。');
-      return;
-    }
-
-    const reader=new FileReader();
-
-    reader.onload=function(e){
-      try{
-        const book=XLSX.read(e.target.result,{type:'array'});
-
-        const sheet=
-          book.Sheets['订单明细']||
-          book.Sheets[book.SheetNames[0]];
-
-        const rows=XLSX.utils.sheet_to_json(sheet,{
-          header:1,
-          defval:''
-        });
-
-        const isBackup=rows[0]&&rows[0].includes('网络和版本');
-
-        pending=[];
-
-        if(isBackup){
-          const heads=rows[0];
-
-          rows.slice(1).forEach(function(row){
-            const data={};
-
-            heads.forEach(function(head,i){
-              data[head]=row[i];
-            });
-
-            if(!text(data['网络和版本'])&&!text(data['原始商品信息'])){
-              return;
-            }
-
-            const cost=number(data['成本']);
-            const price=number(data['售价']);
-
-            pending.push({
-              date:text(data['日期']),
-              version:text(data['网络和版本'])||'未识别',
-              capacity:text(data['容量']),
-              fingerprint:text(data['指纹'])||'',
-              channel:text(data['渠道'])||'无货源',
-              trackingNumber:text(data['快递单号']),
-              address:text(data['收货地址']),
-              cost:cost,
-              price:price,
-              profit:(price-cost).toFixed(2),
-              editHistory:history(data['编辑记录']),
-              originalProduct:text(data['原始商品信息'])
-            });
-          });
-        }else{
-          rows.forEach(function(row){
-            if(!text(row[0]))return;
-
-            const info=modelInfo(row[0]);
-            const cost=number(row[2]);
-            const price=number(row[3]);
-
-            pending.push({
-              date:'',
-              version:info.version,
-              capacity:info.capacity,
-              fingerprint:info.fingerprint,
-              channel:'无货源',
-              trackingNumber:text(row[1]),
-              address:text(row[5]),
-              cost:cost,
-              price:price,
-              profit:(price-cost).toFixed(2),
-              editHistory:[],
-              originalProduct:info.raw
-            });
-          });
-        }
-
-        document.getElementById('importOrderInfo').textContent=
-          '已读取 '+pending.length+' 条订单，确认后会生成并导入。';
-
-      }catch(error){
-        pending=[];
-        document.getElementById('importOrderInfo').textContent=
-          '读取失败，请选择 Excel 文件。';
-      }
-    };
-
-    reader.readAsArrayBuffer(file);
-  };
-
-  window.saveImportedOrders=function(){
-    if(!pending.length){
-      alert('请先选择包含订单数据的 Excel 文件。');
-      return;
-    }
-
-    const date=document.getElementById('importOrderDate').value;
-
-    if(!date){
-      alert('请选择导入日期。');
-      return;
-    }
-
-    if(!confirm('确定生成 '+pending.length+' 条订单吗？它们会追加到现有订单明细。')){
-      return;
-    }
-
-    let existing=[];
-
-    try{
-      existing=JSON.parse(localStorage.getItem('xianyuOrders')||'[]');
-
-      if(!Array.isArray(existing)){
-        existing=[];
-      }
-    }catch(e){
-      existing=[];
-    }
-
-    const imported=pending.map(function(item,index){
-      return Object.assign({},item,{
-        id:'import-'+Date.now()+'-'+index,
-        date:item.date||date
-      });
-    });
-
-    localStorage.setItem(
-      'xianyuOrders',
-      JSON.stringify(imported.concat(existing))
-    );
-
-    alert('已生成 '+imported.length+' 条订单，网页将自动刷新。');
-
-    location.reload();
-  };
-})();
-</script>
-<style>
-.dyson-profit{background:#eef4ff;color:#2563eb;font-weight:bold}
-.dyson-card{border:1px solid #e2e8f0;border-radius:11px;padding:12px;margin-top:10px}
-.dyson-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.dyson-search{position:relative}
-.dyson-search span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#64748b}
-.dyson-search input{padding-left:42px}
-</style>
-
-<script>
-(function(){
-  const key="dysonOrders";
-  let editingId=null;
-  let dysonOrders=[];
-
+  return x;
+}
+function saveForm(stock){
   try{
-    dysonOrders=JSON.parse(localStorage.getItem(key)||"[]");
-    if(!Array.isArray(dysonOrders))dysonOrders=[];
-  }catch(e){
-    dysonOrders=[];
-  }
-
-  document.title="7plus数据";
-
-  const title=document.querySelector("h1");
-  if(title)title.textContent="7plus数据";
-
-  const tabs=document.querySelector(".tabs");
-
-  if(!tabs||document.getElementById("tab-dyson"))return;
-
-  tabs.style.gridTemplateColumns="repeat(3,1fr)";
-
-  const tab=document.createElement("button");
-  tab.id="tab-dyson";
-  tab.className="tab-button";
-  tab.textContent="戴森数据";
-  tab.onclick=function(){
-    showPage("dyson");
-    renderDyson();
-  };
-
-  tabs.appendChild(tab);
-
-  const page=document.createElement("section");
-  page.id="page-dyson";
-  page.className="page";
-
-  page.innerHTML=`
-    <div class="box" id="dysonFormBox">
-      <h2 id="dysonFormTitle">新增戴森订单</h2>
-
-      <label>日期</label>
-      <input id="dysonDate" type="date">
-
-      <label>戴森型号</label>
-      <select id="dysonModel">
-        <option value="">请选择</option>
-        <option>HD08</option>
-        <option>HD15</option>
-        <option>HD16</option>
-      </select>
-
-      <label>快递单号</label>
-      <input id="dysonTracking" placeholder="请输入快递单号">
-
-      <label>收货地址</label>
-      <textarea id="dysonAddress"
-        placeholder="请输入收货人、手机号和详细地址"></textarea>
-
-      <div class="two-fields">
-        <div>
-          <label>成本</label>
-          <input id="dysonCost" type="number" step="0.01"
-            placeholder="成本" oninput="calcDysonProfit()">
-        </div>
-
-        <div>
-          <label>售价</label>
-          <input id="dysonPrice" type="number" step="0.01"
-            placeholder="售价" oninput="calcDysonProfit()">
-        </div>
-      </div>
-
-      <label>利润</label>
-      <input id="dysonProfit" class="dyson-profit"
-        placeholder="自动计算" readonly>
-
-      <label>备注</label>
-      <textarea id="dysonRemark"
-        placeholder="选填，例如颜色、配件、成色等"></textarea>
-
-      <button id="dysonSaveButton"
-        class="primary-button"
-        onclick="saveDysonOrder()">
-        保存戴森订单
-      </button>
-
-      <button id="dysonDeleteButton"
-        class="delete-button hidden"
-        onclick="deleteDysonOrder()">
-        删除戴森订单
-      </button>
-    </div>
-
-    <div class="box">
-      <h2>戴森订单明细</h2>
-
-      <label>搜索戴森订单</label>
-      <div class="dyson-search">
-        <span>⌕</span>
-        <input id="dysonSearch"
-          placeholder="搜索型号、单号、地址、备注等"
-          oninput="renderDyson()">
-      </div>
-
-      <div class="summary-grid">
-        <div class="summary-card">
-          <div class="summary-label">订单数量</div>
-          <div class="summary-value" id="dysonCount">0</div>
-        </div>
-
-        <div class="summary-card">
-          <div class="summary-label">总成本</div>
-          <div class="summary-value" id="dysonTotalCost">¥0.00</div>
-        </div>
-
-        <div class="summary-card">
-          <div class="summary-label">总售价</div>
-          <div class="summary-value" id="dysonTotalPrice">¥0.00</div>
-        </div>
-
-        <div class="summary-card">
-          <div class="summary-label">总利润</div>
-          <div class="summary-value" id="dysonTotalProfit">¥0.00</div>
-        </div>
-      </div>
-
-      <div id="dysonList"></div>
-    </div>
-  `;
-
-  document.querySelector("main").appendChild(page);
-
-  function today(){
-    const n=new Date();
-
-    return n.getFullYear()+"-"+
-      String(n.getMonth()+1).padStart(2,"0")+"-"+
-      String(n.getDate()).padStart(2,"0");
-  }
-
-  function dateText(date){
-    if(!date)return"未设置日期";
-
-    const p=String(date).split("-");
-
-    return Number(p[1])+"月"+Number(p[2])+"日";
-  }
-
-  function money(value){
-    return "¥"+(Number(value)||0).toFixed(2);
-  }
-
-  function safe(value){
-    return String(value||"")
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
-      .replace(/'/g,"&#039;");
-  }
-
-  window.calcDysonProfit=function(){
-    const cost=parseFloat(document.getElementById("dysonCost").value);
-    const price=parseFloat(document.getElementById("dysonPrice").value);
-
-    document.getElementById("dysonProfit").value=
-      !isNaN(cost)&&!isNaN(price)
-        ?(price-cost).toFixed(2)
-        :"";
-  };
-
-  window.saveDysonOrder=function(){
-    const date=document.getElementById("dysonDate").value;
-    const model=document.getElementById("dysonModel").value;
-    const cost=document.getElementById("dysonCost").value;
-    const price=document.getElementById("dysonPrice").value;
-
-    if(!date||!model||cost===""||price===""){
-      alert("请填写日期、型号、成本和售价");
-      return;
+    const type=stock?'i':'o',old=editing?db[type][editing.index]:null;
+    const x={...(old||{}),...formData(stock),id:old?.id??uid()};
+    if(old&&!stock){
+      const t=val('editType'),r=val('editReason');
+      if(!t||t==='其他'&&!r)throw Error('请选择编辑类型；其他需要填写说明');
+      x.editHistory=[...(old.editHistory||[]),{date:today(),type:t,reason:t==='其他'?r:t}];
     }
+    const list=db[type].slice();
+    if(old)list[editing.index]=x;else list.unshift(x);
+    if(!commit({[type]:list}))return;
+    editing=null;
+    page=stock?2:1;search='';filterDate='all';render();
+  }catch(e){alert(e.message)}
+}
+function editRecord(type,index){
+  if(!leaveEdit())return;
+  editing={type,index};page=type==='i'?2:0;render();
+}
+function removeOrder(){
+  const t=val('deleteType'),r=t==='其他'?val('deleteReason'):t;
+  if(!r){alert('请选择删除原因，其他需要手动填写');return}
+  if(!confirm('将此订单移到售后？原订单资料会保留在售后。'))return;
+  const x=db.o[editing.index];
+  const a=[{...x,afterSalesId:uid(),afterSalesDate:today(),afterSalesReason:r},...db.a];
+  if(!commit({a,o:db.o.filter((_,i)=>i!==editing.index)}))return;
+  editing=null;page=3;render();
+}
+function sellStock(){
+  try{
+    const seller=val('seller'),no=val('soldNo');
+    if(!seller||!no)throw Error('请填写销售人和单号');
+    const x={...db.i[editing.index],...formData(true),soldSeller:seller,soldOrderNumber:no,soldDate:today()};
+    if(!confirm('标记为已售出？当前库存修改也会保存。'))return;
+    if(!commit({s:[x,...db.s],i:db.i.filter((_,i)=>i!==editing.index)}))return;
+    editing=null;render();
+  }catch(e){alert(e.message)}
+}
+function permanentlyRemove(type,index){
+  if(!confirm('永久删除这条'+(type==='a'?'售后':'已售出')+'记录？'))return;
+  if(commit({[type]:db[type].filter((_,i)=>i!==index)}))render();
+}
+function product(x){
+  return brand==='dyson'?(x.model||x.version||'未识别型号'):
+    [x.version,x.capacity,String(x.version).includes('纯原')||x.fingerprint==='不适用'?'':x.fingerprint].filter(Boolean).join(' ');
+}
+function detail(x){
+  return `<div class="meta">成本 ${money(x.cost)}${x.price!==undefined?' · 售价 '+money(x.price):''}</div>
+    ${x.channel?`<div class="meta">渠道：${esc(x.channel)}</div>`:''}
+    ${x.remark?`<div class="meta pre">备注：${esc(x.remark)}</div>`:''}`;
+}
+function address(x){
+  return `<details><summary>查看收货地址</summary><div class="meta pre">${esc(x.address||'未填写')}</div></details>`;
+}
+function orderCard(x,index){
+  const h=x.editHistory?.[x.editHistory.length-1],p=profit(x);
+  return `<div class="card"><div class="top"><b>${esc(product(x))}</b><b class="${p>=0?'good':'bad'}">${money(p)}</b></div>
+    <div class="meta">${esc(md(x.date))} · 单号：${esc(x.trackingNumber||'未填写')}</div>
+    ${detail(x)}${address(x)}
+    ${h?`<div class="meta">最近编辑：${esc(h.type==='自定义'?'其他':h.type)} · ${esc(h.reason)}</div>`:''}
+    <button class="wide edit" onclick="editRecord('o',${index})">编辑订单</button></div>`;
+}
+function stats(items,stock=false){
+  const total=k=>items.reduce((n,x)=>n+Number(x[k]||0),0);
+  const pairs=stock?[['库存数量',items.length],['库存总成本',money(total('cost'))]]:
+    [['订单数量',items.length],['总成本',money(total('cost'))],['总售价',money(total('price'))],['总利润',money(items.reduce((n,x)=>n+profit(x),0))]];
+  return `<div class="stats">${pairs.map(([l,v])=>`<div class="stat"><small>${l}</small><strong>${v}</strong></div>`).join('')}</div>`;
+}
+function orderPage(){
+  const dates=[...new Set(db.o.map(x=>x.date).filter(Boolean))].sort().reverse();
+  if(!dates.includes(filterDate))filterDate='all';
+  return `<div class="box"><h2>订单明细</h2>
+    <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>
+    <input id="search" type="search" value="${esc(search)}" placeholder="搜索型号、单号、地址、渠道、备注" oninput="search=this.value;renderOrders()"></div>
+    <label>日期筛选</label><select id="filter" onchange="filterDate=this.value;renderOrders()">
+    <option value="all">全部日期</option>${dates.map(d=>`<option value="${esc(d)}" ${d===filterDate?'selected':''}>${esc(d)}</option>`).join('')}</select>
+    <div id="totals"></div><div id="orders"></div></div>`;
+}
+function renderOrders(){
+  const words=search.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const entries=db.o.map((x,index)=>({x,index})).filter(({x})=>{
+    const text=[x.id,product(x),x.date,md(x.date),x.channel,x.trackingNumber,x.address,x.remark,x.originalProduct,x.cost,x.price,profit(x),...(x.editHistory||[]).map(h=>h.reason)].join(' ').toLowerCase();
+    return (filterDate==='all'||x.date===filterDate)&&words.every(w=>text.includes(w));
+  });
+  $('totals').innerHTML=stats(entries.map(e=>e.x));
+  const groups=new Map();
+  for(const e of entries){
+    const d=e.x.date||'';
+    if(!groups.has(d))groups.set(d,[]);
+    groups.get(d).push(e);
+  }
+  $('orders').innerHTML=entries.length?[...groups.keys()].sort().reverse().map(d=>{
+    const list=groups.get(d),p=list.reduce((n,e)=>n+profit(e.x),0);
+    return `<div class="day"><span>${esc(md(d))} · ${list.length}单</span><span class="${p>=0?'good':'bad'}">利润 ${money(p)}</span></div>`+
+      list.map(e=>orderCard(e.x,e.index)).join('');
+  }).join(''):'<div class="empty">没有符合条件的订单。</div>';
+}
+function stockPage(){
+  return formPage(true)+`<div class="box"><h2>库存明细</h2>${stats(db.i,true)}
+    ${db.i.map((x,i)=>`<div class="card"><div class="top"><b>${esc(product(x))}</b><b>${money(x.cost)}</b></div>${detail(x)}
+    <button class="wide edit" onclick="editRecord('i',${i})">编辑库存 / 标记售出</button></div>`).join('')||'<div class="empty">暂无库存</div>'}</div>
+    <div class="box"><h2>已售出记录</h2>
+    ${db.s.map((x,i)=>`<div class="card sold"><b>${esc(product(x))}</b>
+    <div class="meta">${esc(md(x.soldDate))} · 销售人：${esc(x.soldSeller||'未填写')}</div>
+    <div class="meta">单号：${esc(x.soldOrderNumber||'未填写')}</div>${detail(x)}
+    <button class="wide danger" onclick="permanentlyRemove('s',${i})">删除已售出记录</button></div>`).join('')||'<div class="empty">暂无已售出记录</div>'}</div>`;
+}
+function afterPage(){
+  return `<div class="box"><h2>售后 · ${db.a.length}条</h2>
+    ${db.a.map((x,i)=>`<div class="card after"><div class="top"><b>${esc(product(x))}</b><b>${esc(x.afterSalesReason||'未填写原因')}</b></div>
+    <div class="meta">售后日期：${esc(md(x.afterSalesDate))} · 原订单：${esc(md(x.date))}</div>
+    <div class="meta">快递单号：${esc(x.trackingNumber||'未填写')}</div>${detail(x)}${address(x)}
+    <div class="meta">原订单利润：${money(profit(x))}</div>
+    <button class="wide danger" onclick="permanentlyRemove('a',${i})">删除售后记录</button></div>`).join('')||'<div class="empty">暂无售后记录</div>'}</div>`;
+}
 
-    const order={
-      id:editingId||("dyson-"+Date.now()),
-      date:date,
-      model:model,
-      trackingNumber:document.getElementById("dysonTracking").value.trim(),
-      address:document.getElementById("dysonAddress").value.trim(),
-      cost:cost,
-      price:price,
-      profit:(Number(price)-Number(cost)).toFixed(2),
-      remark:document.getElementById("dysonRemark").value.trim()
-    };
-
-    if(editingId){
-      dysonOrders=dysonOrders.map(function(item){
-        return item.id===editingId?order:item;
+/* 旧版戴森数据分别查看，避免自动混合和重复导入 */
+function changeSource(){
+  const s=val('source');
+  if(!sources[s])return;
+  source=s;
+  localStorage.setItem('dysonActiveSource',s);
+  editing=null;notice('');load();render();
+}
+function backupPage(){
+  return `<div class="box"><h2>${brand==='seven'?'7plus':'戴森'}数据备份</h2>
+    <p class="meta">订单 ${db.o.length} · 库存 ${db.i.length} · 已售出 ${db.s.length} · 售后 ${db.a.length}</p>
+    <button class="wide primary" onclick="exportBackup()">导出 Excel 备份</button>
+    <p class="meta">下载后保存到手机“文件”。数据只在当前浏览器保存。</p>
+    <label>恢复本系统备份</label><input id="restoreFile" type="file" accept=".xlsx,.xls">
+    <button class="wide edit" onclick="restoreBackup()">选择备份并恢复</button>
+    ${brand==='dyson'?`
+      <h3>查看以前版本的戴森数据</h3>
+      <p class="meta">各版本分别保留。若当前没有订单，可切换查看；不会删除或合并其他版本。</p>
+      <select id="source" onchange="changeSource()">${Object.keys(sources).map(s=>`<option value="${s}" ${s===source?'selected':''}>${{v3:'精简版',v2:'双页面版',old:'最早版本'}[s]} · ${sourceCount(sources[s])<0?'读取异常':sourceCount(sources[s])+'条记录'}</option>`).join('')}</select>
+    `:''}
+    <button class="wide edit" onclick="exportRaw()">保存全部版本原始备份</button>
+  </div><div class="box"><h2>页面解锁</h2>
+    <button class="wide edit" onclick="bindFace()">绑定 Face ID / 指纹</button>
+    <button class="wide edit" onclick="changePin()">修改六位密码</button>
+    <button class="wide edit" onclick="location.reload()">锁定页面</button>
+    <p class="meta">这是本机页面锁，不是云端账号或数据加密。Face ID / 指纹由设备系统处理，也可能使用设备密码验证。</p>
+  </div>`;
+}
+function needXLSX(){
+  if(!window.XLSX)throw Error('Excel 功能未加载，请联网刷新后重试');
+}
+function download(blob,name){
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
+function exportRaw(){
+  try{
+    const data={};
+    const all=[...Object.values(sevenKeys),...Object.values(sources).flatMap(Object.values)];
+    for(const k of all)if(localStorage.getItem(k)!==null)data[k]=localStorage.getItem(k);
+    download(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'全部原始数据_'+today()+'.json');
+  }catch(e){alert('备份失败：'+e.message)}
+}
+function exportBackup(){
+  try{
+    needXLSX();
+    if(blocked)throw Error('读取异常，请使用“保存全部版本原始备份”');
+    const book=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book,XLSX.utils.json_to_sheet([{系统:'records-v1',分类:brand,日期:today()}]),'说明');
+    for(const t in db){
+      const rows=db[t].map(x=>({
+        编号:x.id??'',日期:x.date??'',型号:product(x),渠道:x.channel??'',
+        快递单号:x.trackingNumber??'',收货地址:x.address??'',
+        成本:x.cost??'',售价:x.price??'',利润:t==='o'||t==='a'?profit(x):'',
+        备注:x.remark??'',销售人:x.soldSeller??'',售出单号:x.soldOrderNumber??'',
+        售后原因:x.afterSalesReason??'',完整记录:JSON.stringify(x)
+      }));
+      const ws=XLSX.utils.json_to_sheet(rows,{header:['编号','日期','型号','渠道','快递单号','收货地址','成本','售价','利润','备注','销售人','售出单号','售后原因','完整记录']});
+      XLSX.utils.book_append_sheet(book,ws,sheetNames[t]);
+    }
+    XLSX.writeFile(book,(brand==='seven'?'7plus':'戴森')+'数据备份_'+today()+'.xlsx');
+  }catch(e){alert(e.message)}
+}
+async function workbook(file){
+  needXLSX();
+  if(!file)throw Error('请先选择文件');
+  return XLSX.read(await file.arrayBuffer(),{type:'array'});
+}
+async function restoreBackup(){
+  try{
+    const b=await workbook($('restoreFile').files[0]);
+    const meta=b.Sheets['说明']&&XLSX.utils.sheet_to_json(b.Sheets['说明'])[0];
+    if(!meta||meta.系统!=='records-v1'||meta.分类!==brand)
+      throw Error('请选择当前分类在本版本导出的备份。旧订单表请使用“数据导入”。');
+    const next={};
+    for(const t in db){
+      const ws=b.Sheets[sheetNames[t]];
+      if(!ws)throw Error('备份缺少工作表：'+sheetNames[t]);
+      next[t]=XLSX.utils.sheet_to_json(ws,{defval:''}).map(r=>{
+        const x=JSON.parse(r.完整记录);
+        if(!x||Array.isArray(x)||typeof x!=='object')throw Error('备份记录格式错误');
+        return normalize(x);
       });
-    }else{
-      dysonOrders.unshift(order);
     }
+    const n=Object.values(next).reduce((s,a)=>s+a.length,0);
+    if(!confirm('恢复 '+n+' 条记录，替换当前分类的数据？'))return;
+    if(commit(next)){editing=null;alert('恢复完成');render()}
+  }catch(e){alert('未恢复：'+e.message)}
+}
 
-    localStorage.setItem(key,JSON.stringify(dysonOrders));
-
-    resetDysonForm();
-    renderDyson();
-  };
-
-  window.editDysonOrder=function(id){
-    const item=dysonOrders.find(function(order){
-      return order.id===id;
-    });
-
-    if(!item)return;
-
-    editingId=id;
-
-    document.getElementById("dysonDate").value=item.date||today();
-    document.getElementById("dysonModel").value=item.model||"";
-    document.getElementById("dysonTracking").value=item.trackingNumber||"";
-    document.getElementById("dysonAddress").value=item.address||"";
-    document.getElementById("dysonCost").value=item.cost||"";
-    document.getElementById("dysonPrice").value=item.price||"";
-    document.getElementById("dysonRemark").value=item.remark||"";
-
-    calcDysonProfit();
-
-    document.getElementById("dysonFormTitle").textContent="编辑戴森订单";
-    document.getElementById("dysonSaveButton").textContent="保存修改";
-    document.getElementById("dysonDeleteButton").classList.remove("hidden");
-
-    document.getElementById("dysonFormBox").scrollIntoView({
-      behavior:"smooth"
-    });
-  };
-
-  window.deleteDysonOrder=function(){
-    if(!editingId)return;
-
-    if(!confirm("确定删除这条戴森订单吗？")){
-      return;
-    }
-
-    dysonOrders=dysonOrders.filter(function(item){
-      return item.id!==editingId;
-    });
-
-    localStorage.setItem(key,JSON.stringify(dysonOrders));
-
-    resetDysonForm();
-    renderDyson();
-  };
-
-  function resetDysonForm(){
-    editingId=null;
-
-    [
-      "dysonModel",
-      "dysonTracking",
-      "dysonAddress",
-      "dysonCost",
-      "dysonPrice",
-      "dysonProfit",
-      "dysonRemark"
-    ].forEach(function(id){
-      document.getElementById(id).value="";
-    });
-
-    document.getElementById("dysonDate").value=today();
-    document.getElementById("dysonFormTitle").textContent="新增戴森订单";
-    document.getElementById("dysonSaveButton").textContent="保存戴森订单";
-    document.getElementById("dysonDeleteButton").classList.add("hidden");
+/* 导入：先检查全部记录，再统一保存 */
+function importPage(){
+  return `<div class="box"><h2>数据导入</h2>
+    <p class="meta">导入到当前 ${brand==='seven'?'7plus':'戴森'} 分类，追加订单。支持本版本备份和带表头的订单表。</p>
+    <button class="wide edit" onclick="template()">下载导入模板</button>
+    ${input('importDate','表格没有日期时使用','date')}
+    <script-placeholder></script-placeholder>
+    <label>选择 Excel</label><input id="importFile" type="file" accept=".xlsx,.xls" onchange="previewImport()">
+    <p id="importInfo" class="meta">尚未选择文件。</p>
+    <button class="wide primary" onclick="applyImport()">确认导入订单</button>
+  </div>`;
+}
+function template(){
+  try{
+    needXLSX();
+    const headers=brand==='seven'?['日期','网络和版本','容量','指纹','渠道','快递单号','收货地址','成本','售价','备注']:
+      ['日期','型号','快递单号','收货地址','成本','售价','备注'];
+    const b=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(b,XLSX.utils.aoa_to_sheet([headers]),'订单明细');
+    XLSX.writeFile(b,(brand==='seven'?'7plus':'戴森')+'导入模板.xlsx');
+  }catch(e){alert(e.message)}
+}
+function parseDate(v,fallback){
+  if(v===''||v===undefined||v===null)return fallback;
+  if(typeof v==='number'){
+    const d=XLSX.SSF.parse_date_code(v);
+    if(!d)throw Error('日期无法识别');
+    v=d.y+'-'+String(d.m).padStart(2,'0')+'-'+String(d.d).padStart(2,'0');
   }
-
-  window.renderDyson=function(){
-    const search=document.getElementById("dysonSearch")
-      ?document.getElementById("dysonSearch").value.trim().toLowerCase()
-      :"";
-
-    const list=dysonOrders.filter(function(item){
-      const all=[
-        item.date,
-        item.model,
-        item.trackingNumber,
-        item.address,
-        item.cost,
-        item.price,
-        item.profit,
-        item.remark
-      ].join(" ").toLowerCase();
-
-      return all.includes(search);
+  const m=String(v).trim().match(/^(\d{4})[-/年](\d{1,2})[-/月](\d{1,2})日?$/);
+  if(!m)throw Error('日期请使用 YYYY-MM-DD');
+  const y=+m[1],mo=+m[2],d=+m[3],test=new Date(y,mo-1,d);
+  if(test.getFullYear()!==y||test.getMonth()!==mo-1||test.getDate()!==d)throw Error('无效日期');
+  return y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+}
+function importNumber(v,label){
+  if(v===undefined||v===null||String(v).trim()===''||!Number.isFinite(Number(v))||Number(v)<0)
+    throw Error(label+'缺失或无效');
+  return Math.round(Number(v)*100)/100;
+}
+function rawModel(raw){
+  const text=String(raw),lock=text.includes('无锁'),pure=text.includes('纯原'),card=text.includes('插卡');
+  let version=card?'插卡':/wi[\s-]?fi/i.test(text)?'Wi-Fi':'未识别';
+  if(lock)version=pure?(card?'无锁纯原插卡':'无锁纯原Wi-Fi'):(card?'无锁插卡':'无锁Wi-Fi');
+  return {version,capacity:['256','128','64','32'].find(c=>text.includes(c))||'',
+    fingerprint:pure?'不适用':text.includes('无指纹')?'无指纹':text.includes('指纹')?'指纹':'',originalProduct:text};
+}
+async function previewImport(){
+  pending=null;
+  try{
+    const b=await workbook($('importFile').files[0]);
+    const meta=b.Sheets['说明']&&XLSX.utils.sheet_to_json(b.Sheets['说明'])[0];
+    if(meta&&meta.分类!==brand)throw Error('文件属于另一个分类');
+    const ws=b.Sheets['订单明细']||b.Sheets[b.SheetNames[0]];
+    const matrix=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    if(!matrix.length)throw Error('表格为空');
+    const header=matrix[0].some(h=>['完整记录','网络和版本','型号','戴森型号','成本'].includes(String(h)));
+    if(!header&&brand==='dyson')throw Error('戴森表格需要表头');
+    const rows=header?XLSX.utils.sheet_to_json(ws,{defval:''}):matrix;
+    const result=[],errors=[];
+    const fallback=val('importDate')||today();
+    rows.forEach((r,i)=>{
+      try{
+        let x;
+        if(header&&r.完整记录){
+          x=normalize(JSON.parse(r.完整记录));
+          if(brand==='dyson'&&!models.includes(String(x.model).toUpperCase()))throw Error('不是戴森型号');
+          if(brand==='seven'&&models.includes(String(x.model).toUpperCase()))throw Error('不是7plus订单');
+        }else if(header){
+          x={id:r.编号||uid(),date:r.日期,version:r['网络和版本'],capacity:String(r.容量??''),
+            fingerprint:r.指纹||r.指纹功能||'',model:String(r.型号||r.戴森型号||'').trim().toUpperCase(),
+            channel:r.渠道||'无货源',trackingNumber:String(r.快递单号??''),address:r.收货地址||'',
+            cost:r.成本,price:r.售价,remark:r.备注||'',editHistory:[]};
+          if(brand==='dyson'&&!models.includes(x.model))throw Error('型号只能是HD08、HD15、HD16');
+          if(brand==='seven'&&!x.version)throw Error('缺少网络和版本');
+        }else{
+          if(!r.some(v=>String(v).trim()))return;
+          x={...rawModel(r[0]),id:uid(),channel:'无货源',trackingNumber:String(r[1]??''),cost:r[2],price:r[3],address:r[5]||'',editHistory:[]};
+        }
+        x.date=parseDate(x.date,fallback);
+        x.cost=importNumber(x.cost,'成本');x.price=importNumber(x.price,'售价');
+        x.profit=profit(x).toFixed(2);
+        result.push(normalize(x));
+      }catch(e){errors.push('第'+(i+(header?2:1))+'行：'+e.message)}
     });
+    if(errors.length)throw Error(errors.slice(0,6).join('\n')+'\n请修正后重新选择文件，本次未导入。');
+    pending=result;
+    $('importInfo').textContent='检查通过：'+result.length+'条。点击确认后追加，编号或快递单号重复的订单会跳过。';
+  }catch(e){$('importInfo').textContent=e.message}
+}
+function applyImport(){
+  if(!pending?.length){alert('请先选择并检查文件');return}
+  const ids=new Set(db.o.map(x=>String(x.id)));
+  const tracks=new Set(db.o.map(x=>x.trackingNumber).filter(Boolean));
+  const added=[];
+  for(const x of pending){
+    if(ids.has(String(x.id))||x.trackingNumber&&tracks.has(x.trackingNumber))continue;
+    added.push(x);ids.add(String(x.id));
+    if(x.trackingNumber)tracks.add(x.trackingNumber);
+  }
+  if(!confirm('新增 '+added.length+' 条，跳过重复 '+(pending.length-added.length)+' 条？'))return;
+  if(!commit({o:[...added,...db.o]}))return;
+  pending=null;page=1;search='';filterDate='all';render();
+}
 
-    const cost=list.reduce(function(sum,item){
-      return sum+(Number(item.cost)||0);
-    },0);
-
-    const price=list.reduce(function(sum,item){
-      return sum+(Number(item.price)||0);
-    },0);
-
-    const profit=list.reduce(function(sum,item){
-      return sum+(Number(item.profit)||0);
-    },0);
-
-    document.getElementById("dysonCount").textContent=list.length;
-    document.getElementById("dysonTotalCost").textContent=money(cost);
-    document.getElementById("dysonTotalPrice").textContent=money(price);
-    document.getElementById("dysonTotalProfit").textContent=money(profit);
-
-    const box=document.getElementById("dysonList");
-
-    if(!list.length){
-      box.innerHTML='<div class="empty">暂时还没有戴森订单。</div>';
-      return;
-    }
-
-    const groups={};
-
-    list.forEach(function(item){
-      const day=item.date||"未设置";
-
-      if(!groups[day]){
-        groups[day]=[];
-      }
-
-      groups[day].push(item);
-    });
-
-    box.innerHTML=Object.keys(groups)
-      .sort()
-      .reverse()
-      .map(function(day){
-        const items=groups[day];
-
-        const dayProfit=items.reduce(function(sum,item){
-          return sum+(Number(item.profit)||0);
-        },0);
-
-        return `
-          <div class="date-group">
-            <div class="date-heading">
-              <span>${safe(dateText(day))}</span>
-              <span class="daily-profit">
-                当日利润：${money(dayProfit)}
-              </span>
-            </div>
-
-            ${items.map(function(item){
-              const profit=Number(item.profit)||0;
-
-              return `
-                <div class="dyson-card">
-                  <div class="dyson-top">
-                    <div class="item-title">戴森 ${safe(item.model)}</div>
-
-                    <strong class="${
-                      profit>=0?"profit-positive":"profit-negative"
-                    }">
-                      ${money(profit)}
-                    </strong>
-                  </div>
-
-                  <div class="meta-line">
-                    ${safe(dateText(item.date))}
-                  </div>
-
-                  <div class="meta-line">
-                    快递单号：${safe(item.trackingNumber||"未填写")}
-                  </div>
-
-                  <div class="money-line">
-                    成本 ${money(item.cost)}
-                    · 售价 ${money(item.price)}
-                  </div>
-
-                  <details class="address-details">
-                    <summary>查看收货地址</summary>
-                    <div class="address-text">
-                      ${safe(item.address||"未填写")}
-                    </div>
-                  </details>
-
-                  ${
-                    item.remark
-                      ?`<div class="edit-note">备注：${safe(item.remark)}</div>`
-                      :""
-                  }
-
-                  <button class="edit-button"
-                    onclick="editDysonOrder('${safe(item.id)}')">
-                    编辑戴森订单
-                  </button>
-                </div>
-              `;
-            }).join("")}
-          </div>
-        `;
-      }).join("");
-  };
-
-  resetDysonForm();
-  renderDyson();
-})();
+/* 沿用原六位密码和已绑定的设备凭证 */
+const securityKey='xianyuSecurityV1';
+let security={};
+try{security=JSON.parse(localStorage.getItem(securityKey)||'{}')||{}}
+catch{$('lockMessage').textContent='密码设置读取失败，请勿清除网站数据。'}
+async function hash(text){
+  return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text))))
+    .map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function opened(){
+  $('lock').classList.add('hidden');
+  $('app').hidden=false;
+  load();render();
+}
+async function unlockPin(){
+  try{
+    const pin=val('pin');
+    if(!/^\d{6}$/.test(pin))throw Error('请输入六位数字');
+    if(!security.pinHash){
+      if(pin!==val('again'))throw Error('两次密码不一致');
+      security.pinHash=await hash(pin);
+      localStorage.setItem(securityKey,JSON.stringify(security));
+    }else if(await hash(pin)!==security.pinHash)throw Error('密码不正确');
+    opened();
+  }catch(e){$('lockMessage').textContent=e.message}
+}
+const bytes=n=>crypto.getRandomValues(new Uint8Array(n));
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+const un64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function unlockFace(){
+  try{
+    if(!security.credentialId)throw Error('尚未绑定');
+    const c=await navigator.credentials.get({publicKey:{
+      challenge:bytes(32),allowCredentials:[{type:'public-key',id:un64(security.credentialId)}],
+      userVerification:'required',timeout:60000
+    }});
+    if(!c||b64(c.rawId)!==security.credentialId)throw Error('设备不匹配');
+    opened();
+  }catch{$('lockMessage').textContent='设备验证未完成，请使用六位密码。'}
+}
+async function bindFace(){
+  try{
+    if(!window.PublicKeyCredential||!navigator.credentials)throw Error('请使用支持通行密钥的浏览器');
+    const c=await navigator.credentials.create({publicKey:{
+      challenge:bytes(32),rp:{name:'7plus与戴森数据'},
+      user:{id:bytes(16),name:'local-user',displayName:'本机用户'},
+      pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},
+      timeout:60000,attestation:'none'
+    }});
+    security.credentialId=b64(c.rawId);
+    localStorage.setItem(securityKey,JSON.stringify(security));
+    alert('绑定成功');
+  }catch(e){alert('绑定未完成：'+e.message)}
+}
+async function changePin(){
+  try{
+    const old=prompt('当前六位密码');
+    if(old===null)return;
+    if(await hash(old)!==security.pinHash)throw Error('当前密码错误');
+    const n=prompt('新的六位数字密码');
+    if(n===null)return;
+    if(!/^\d{6}$/.test(n))throw Error('必须是六位数字');
+    if(prompt('再次输入新密码')!==n)throw Error('两次密码不一致');
+    security.pinHash=await hash(n);
+    localStorage.setItem(securityKey,JSON.stringify(security));
+    alert('修改成功');
+  }catch(e){alert(e.message)}
+}
+$('lockTitle').textContent=security.pinHash?'页面解锁':'设置六位密码';
+$('again').classList.toggle('hidden',!!security.pinHash);
+$('faceButton').classList.toggle('hidden',!security.credentialId);
+$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')unlockPin()});
 </script>
 </body>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
-<style>
-.workspace-switch{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin:0 0 18px;
-}
-.workspace-switch button{
-  padding:12px;
-  border:0;
-  border-radius:10px;
-  background:#e5e7eb;
-  color:#475569;
-  font-size:16px;
-  font-weight:bold;
-}
-.workspace-switch button.active{
-  background:#2563eb;
-  color:#fff;
-}
-#dysonApp{display:none}
-body.dyson-mode main>:not(.workspace-switch):not(#dysonApp){
-  display:none!important;
-}
-body.dyson-mode #dysonApp{display:block}
-#tab-dyson,#page-dyson{display:none!important}
-
-.dy-tabs{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-  margin:18px 0;
-}
-.dy-tabs button{
-  padding:11px 4px;
-  border:0;
-  border-radius:10px;
-  background:#e5e7eb;
-  color:#475569;
-  font-size:14px;
-}
-.dy-tabs button.active{
-  background:#2563eb;
-  color:#fff;
-}
-.dy-page{display:none}
-.dy-page.active{display:block}
-.dy-card{
-  background:#fff;
-  border:1px solid #e2e8f0;
-  border-radius:12px;
-  padding:12px;
-  margin-top:10px;
-}
-.dy-top{
-  display:flex;
-  justify-content:space-between;
-  gap:8px;
-  align-items:flex-start;
-}
-.dy-title{font-weight:bold;font-size:17px}
-.dy-meta{
-  color:#64748b;
-  font-size:14px;
-  margin-top:7px;
-  word-break:break-all;
-  line-height:1.45;
-}
-.dy-green{color:#16a34a;font-weight:bold}
-.dy-red{color:#dc2626;font-weight:bold}
-.dy-edit{
-  width:100%;
-  margin-top:10px;
-  padding:9px;
-  border:0;
-  border-radius:9px;
-  background:#eef4ff;
-  color:#2563eb;
-}
-.dy-danger{
-  width:100%;
-  margin-top:10px;
-  padding:10px;
-  border:0;
-  border-radius:9px;
-  background:#fee2e2;
-  color:#dc2626;
-}
-.dy-warn{
-  border-left:4px solid #f59e0b;
-  background:#fffbeb;
-}
-.dy-after{
-  border-left:4px solid #ef4444;
-  background:#fff7f7;
-}
-.dy-search-wrap{position:relative}
-.dy-search-wrap span{
-  position:absolute;
-  left:13px;
-  top:12px;
-  color:#64748b;
-  font-size:19px;
-}
-.dy-search-wrap input{padding-left:41px}
-.dy-group-title{
-  display:flex;
-  justify-content:space-between;
-  border-bottom:1px solid #dbe2ea;
-  padding:14px 2px 7px;
-  font-weight:bold;
-}
-</style>
-
-<script>
-(function(){
-  const main=document.querySelector("main");
-  if(!main || document.getElementById("dysonAppV2")) return;
-
-  const keys={
-    orders:"dysonV2Orders",
-    inventory:"dysonV2Inventory",
-    sold:"dysonV2Sold",
-    after:"dysonV2AfterSales"
-  };
-
-  function read(key){
-    try{return JSON.parse(localStorage.getItem(key))||[]}
-    catch(e){return[]}
-  }
-  function save(key,data){
-    localStorage.setItem(key,JSON.stringify(data));
-  }
-  function esc(v){
-    return String(v||"")
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
-      .replace(/'/g,"&#039;");
-  }
-  function today(){
-    const d=new Date();
-    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-  }
-  function dateText(v){
-    if(!v)return"未设置";
-    const a=v.split("-");
-    return Number(a[1])+"月"+Number(a[2])+"日";
-  }
-  function money(v){return "¥"+(Number(v)||0).toFixed(2)}
-  function id(){return "dy-"+Date.now()+"-"+Math.random().toString(16).slice(2)}
-
-  let orders=read(keys.orders);
-  let inventory=read(keys.inventory);
-  let sold=read(keys.sold);
-  let after=read(keys.after);
-  let editingOrder=null;
-  let editingInventory=null;
-
-  /* 把你旧版戴森订单自动复制到新的独立戴森数据中，只执行一次 */
-  if(!orders.length && localStorage.getItem("dysonOrders")){
-    const old=read("dysonOrders");
-    if(old.length){
-      orders=old.map(x=>({
-        id:id(),
-        date:x.date||today(),
-        model:(x.model||x.version||"HD08").toUpperCase(),
-        tracking:x.tracking||x.trackingNumber||"",
-        address:x.address||"",
-        cost:x.cost||"",
-        price:x.price||"",
-        profit:x.profit||((Number(x.price)||0)-(Number(x.cost)||0)).toFixed(2),
-        note:x.note||"",
-        history:[]
-      }));
-      save(keys.orders,orders);
-    }
-  }
-
-  const switcher=document.createElement("div");
-  switcher.className="workspace-switch";
-  switcher.innerHTML=`
-    <button id="switch7plus" class="active" onclick="DysonApp.workspace('seven')">7plus</button>
-    <button id="switchDyson" onclick="DysonApp.workspace('dyson')">戴森</button>
-  `;
-  main.insertBefore(switcher,main.firstChild);
-
-  const app=document.createElement("section");
-  app.id="dysonAppV2";
-  app.innerHTML=`
-    <h1>戴森数据</h1>
-    <p>戴森订单、库存、售后、备份和数据导入</p>
-
-    <div class="dy-tabs">
-      <button id="dy-tab-new" class="active" onclick="DysonApp.page('new')">新增订单</button>
-      <button id="dy-tab-list" onclick="DysonApp.page('list')">订单明细</button>
-      <button id="dy-tab-stock" onclick="DysonApp.page('stock')">库存</button>
-      <button id="dy-tab-after" onclick="DysonApp.page('after')">售后</button>
-      <button id="dy-tab-backup" onclick="DysonApp.page('backup')">备份</button>
-      <button id="dy-tab-import" onclick="DysonApp.page('import')">数据导入</button>
-    </div>
-
-    <section id="dy-page-new" class="dy-page active">
-      <div class="box">
-        <h2 id="dyOrderTitle">新增戴森订单</h2>
-
-        <label>日期</label>
-        <input id="dyDate" type="date">
-
-        <label>戴森型号</label>
-        <select id="dyModel">
-          <option value="">请选择</option>
-          <option>HD08</option>
-          <option>HD15</option>
-          <option>HD16</option>
-        </select>
-
-        <label>快递单号</label>
-        <input id="dyTracking" placeholder="请输入快递单号">
-
-        <label>收货地址</label>
-        <textarea id="dyAddress" placeholder="请输入收货人、手机号和详细地址"></textarea>
-
-        <div class="two-fields">
-          <div>
-            <label>成本</label>
-            <input id="dyCost" type="number" step="0.01" oninput="DysonApp.profit()" placeholder="成本">
-          </div>
-          <div>
-            <label>售价</label>
-            <input id="dyPrice" type="number" step="0.01" oninput="DysonApp.profit()" placeholder="售价">
-          </div>
-        </div>
-
-        <label>利润</label>
-        <input id="dyProfit" class="profit-input" readonly placeholder="自动计算">
-
-        <label>备注</label>
-        <textarea id="dyNote" placeholder="可填写颜色、配件、客户说明等"></textarea>
-
-        <div id="dyEditOptions" class="hidden">
-          <label>本次编辑类型</label>
-          <select id="dyEditType" onchange="DysonApp.editType()">
-            <option value="">请选择</option>
-            <option>换货</option>
-            <option>其他</option>
-          </select>
-
-          <div id="dyEditOtherBox" class="hidden">
-            <label>其他编辑说明</label>
-            <input id="dyEditOther" placeholder="请输入本次修改原因">
-          </div>
-
-          <label>删除原因</label>
-          <select id="dyDeleteReason" onchange="DysonApp.deleteType()">
-            <option value="">请选择</option>
-            <option>退货</option>
-            <option>其他</option>
-          </select>
-
-          <div id="dyDeleteOtherBox" class="hidden">
-            <label>其他删除原因</label>
-            <input id="dyDeleteOther" placeholder="请输入删除原因">
-          </div>
-
-          <button class="dy-danger" onclick="DysonApp.deleteOrder()">删除订单并转到售后</button>
-        </div>
-
-        <button id="dySaveOrder" class="primary-button" onclick="DysonApp.saveOrder()">保存订单</button>
-      </div>
-    </section>
-
-    <section id="dy-page-list" class="dy-page">
-      <div class="box">
-        <h2>戴森订单明细</h2>
-
-        <label>搜索订单</label>
-        <div class="dy-search-wrap">
-          <span>⌕</span>
-          <input id="dySearch" placeholder="搜索型号、快递单号、地址、备注等" oninput="DysonApp.orders()">
-        </div>
-
-        <label>选择日期</label>
-        <select id="dyDateFilter" onchange="DysonApp.orders()">
-          <option value="all">全部日期</option>
-        </select>
-
-        <div class="summary-grid">
-          <div class="summary-card"><div class="summary-label">订单数量</div><div class="summary-value" id="dyCount">0</div></div>
-          <div class="summary-card"><div class="summary-label">总成本</div><div class="summary-value" id="dyCostTotal">¥0.00</div></div>
-          <div class="summary-card"><div class="summary-label">总售价</div><div class="summary-value" id="dyPriceTotal">¥0.00</div></div>
-          <div class="summary-card"><div class="summary-label">总利润</div><div class="summary-value" id="dyProfitTotal">¥0.00</div></div>
-        </div>
-
-        <div id="dyOrderList"></div>
-      </div>
-    </section>
-
-    <section id="dy-page-stock" class="dy-page">
-      <div class="box">
-        <h2 id="dyStockTitle">新增戴森库存</h2>
-
-        <label>戴森型号</label>
-        <select id="dyStockModel">
-          <option value="">请选择</option>
-          <option>HD08</option>
-          <option>HD15</option>
-          <option>HD16</option>
-        </select>
-
-        <label>渠道</label>
-        <input id="dyStockChannel" placeholder="例如：阿冰、拍机堂">
-
-        <label>成本</label>
-        <input id="dyStockCost" type="number" step="0.01" placeholder="库存成本">
-
-        <label>备注</label>
-        <textarea id="dyStockNote" placeholder="可填写颜色、配件、机器状态等"></textarea>
-
-        <button id="dySaveStock" class="primary-button" onclick="DysonApp.saveStock()">添加库存</button>
-
-        <div id="dySoldPanel" class="hidden">
-          <label>销售人</label>
-          <input id="dySeller" placeholder="请输入销售人">
-
-          <label>单号</label>
-          <input id="dySoldNo" placeholder="请输入销售单号">
-
-          <button class="dy-danger" style="background:#fff7ed;color:#ea580c" onclick="DysonApp.sold()">标记为已售出</button>
-        </div>
-      </div>
-
-      <div class="box">
-        <h2>库存明细</h2>
-        <div class="summary-grid">
-          <div class="summary-card"><div class="summary-label">库存数量</div><div class="summary-value" id="dyStockCount">0</div></div>
-          <div class="summary-card"><div class="summary-label">库存总成本</div><div class="summary-value" id="dyStockTotal">¥0.00</div></div>
-        </div>
-        <div id="dyStockList"></div>
-      </div>
-
-      <div class="box">
-        <h2>已售出记录</h2>
-        <div id="dySoldList"></div>
-      </div>
-    </section>
-
-    <section id="dy-page-after" class="dy-page">
-      <div class="box">
-        <h2>戴森售后</h2>
-        <div id="dyAfterList"></div>
-      </div>
-    </section>
-
-    <section id="dy-page-backup" class="dy-page">
-      <div class="box">
-        <h2>戴森数据备份</h2>
-        <p>导出的是戴森自己的数据，不会包含 7plus 数据。</p>
-        <button class="primary-button" onclick="DysonApp.export()">导出 Excel 备份</button>
-
-        <label>恢复戴森备份</label>
-        <input id="dyRestoreFile" type="file" accept=".xlsx,.xls">
-        <button class="dy-danger" style="color:#2563eb;background:#eef4ff" onclick="DysonApp.restore()">导入并恢复戴森备份</button>
-      </div>
-    </section>
-
-    <section id="dy-page-import" class="dy-page">
-      <div class="box">
-        <h2>导入戴森订单</h2>
-        <p>Excel 第一行需要是表头：日期、型号、快递单号、收货地址、成本、售价、备注。</p>
-        <input id="dyImportFile" type="file" accept=".xlsx,.xls">
-        <button class="primary-button" onclick="DysonApp.import()">导入并生成订单</button>
-      </div>
-    </section>
-  `;
-  main.appendChild(app);
-
-  function setPage(name){
-    document.querySelectorAll(".dy-page").forEach(x=>x.classList.remove("active"));
-    document.querySelectorAll(".dy-tabs button").forEach(x=>x.classList.remove("active"));
-    document.getElementById("dy-page-"+name).classList.add("active");
-    document.getElementById("dy-tab-"+name).classList.add("active");
-    if(name==="list") renderOrders();
-    if(name==="stock") renderStock();
-    if(name==="after") renderAfter();
-    window.scrollTo({top:0,behavior:"smooth"});
-  }
-
-  function workspace(name){
-    const dyson=name==="dyson";
-    document.body.classList.toggle("dyson-mode",dyson);
-    document.getElementById("switch7plus").classList.toggle("active",!dyson);
-    document.getElementById("switchDyson").classList.toggle("active",dyson);
-    if(dyson) setPage("new");
-    window.scrollTo({top:0,behavior:"smooth"});
-  }
-
-  function calcProfit(){
-    const c=Number(document.getElementById("dyCost").value);
-    const p=Number(document.getElementById("dyPrice").value);
-    document.getElementById("dyProfit").value=
-      !isNaN(c)&&!isNaN(p)?(p-c).toFixed(2):"";
-  }
-
-  function editType(){
-    const other=document.getElementById("dyEditType").value==="其他";
-    document.getElementById("dyEditOtherBox").classList.toggle("hidden",!other);
-  }
-  function deleteType(){
-    const other=document.getElementById("dyDeleteReason").value==="其他";
-    document.getElementById("dyDeleteOtherBox").classList.toggle("hidden",!other);
-  }
-
-  function resetOrder(){
-    editingOrder=null;
-    ["dyModel","dyTracking","dyAddress","dyCost","dyPrice","dyProfit","dyNote","dyEditType","dyEditOther","dyDeleteReason","dyDeleteOther"]
-      .forEach(x=>document.getElementById(x).value="");
-    document.getElementById("dyDate").value=today();
-    document.getElementById("dyOrderTitle").textContent="新增戴森订单";
-    document.getElementById("dySaveOrder").textContent="保存订单";
-    document.getElementById("dyEditOptions").classList.add("hidden");
-    editType();deleteType();
-  }
-
-  function saveOrder(){
-    const model=document.getElementById("dyModel").value;
-    const cost=document.getElementById("dyCost").value;
-    const price=document.getElementById("dyPrice").value;
-    if(!model||cost===""||price===""){
-      alert("请填写型号、成本和售价");
-      return;
-    }
-
-    let history=[];
-    if(editingOrder){
-      const type=document.getElementById("dyEditType").value;
-      const other=document.getElementById("dyEditOther").value.trim();
-      if(!type){alert("保存编辑前，请选择：换货或其他");return}
-      if(type==="其他"&&!other){alert("请输入其他编辑说明");return}
-      const old=orders.find(x=>x.id===editingOrder);
-      history=old&&old.history?old.history:[];
-      history.push({date:today(),type:type,reason:type==="其他"?other:"换货"});
-    }
-
-    const item={
-      id:editingOrder||id(),
-      date:document.getElementById("dyDate").value||today(),
-      model,
-      tracking:document.getElementById("dyTracking").value.trim(),
-      address:document.getElementById("dyAddress").value.trim(),
-      cost,price,
-      profit:document.getElementById("dyProfit").value,
-      note:document.getElementById("dyNote").value.trim(),
-      history
-    };
-    if(editingOrder) orders=orders.map(x=>x.id===editingOrder?item:x);
-    else orders.unshift(item);
-    save(keys.orders,orders);
-    resetOrder();
-    updateDateFilter();
-    renderOrders();
-    setPage("list");
-  }
-
-  function editOrder(orderId){
-    const x=orders.find(v=>v.id===orderId);
-    if(!x)return;
-    editingOrder=orderId;
-    document.getElementById("dyDate").value=x.date||today();
-    document.getElementById("dyModel").value=x.model;
-    document.getElementById("dyTracking").value=x.tracking||"";
-    document.getElementById("dyAddress").value=x.address||"";
-    document.getElementById("dyCost").value=x.cost;
-    document.getElementById("dyPrice").value=x.price;
-    document.getElementById("dyNote").value=x.note||"";
-    document.getElementById("dyOrderTitle").textContent="编辑戴森订单";
-    document.getElementById("dySaveOrder").textContent="保存编辑";
-    document.getElementById("dyEditOptions").classList.remove("hidden");
-    calcProfit();setPage("new");
-  }
-
-  function deleteOrder(){
-    const reason=document.getElementById("dyDeleteReason").value;
-    const other=document.getElementById("dyDeleteOther").value.trim();
-    if(!reason){alert("请选择删除原因");return}
-    if(reason==="其他"&&!other){alert("请输入其他删除原因");return}
-    const item=orders.find(x=>x.id===editingOrder);
-    if(!item)return;
-    if(!confirm("确定删除此订单并转到售后吗？"))return;
-    after.unshift({...item,afterDate:today(),afterReason:reason==="其他"?other:"退货"});
-    orders=orders.filter(x=>x.id!==editingOrder);
-    save(keys.orders,orders);save(keys.after,after);
-    resetOrder();updateDateFilter();renderOrders();renderAfter();setPage("after");
-  }
-
-  function updateDateFilter(){
-    const box=document.getElementById("dyDateFilter");
-    const old=box.value;
-    const dates=[...new Set(orders.map(x=>x.date).filter(Boolean))].sort().reverse();
-    box.innerHTML='<option value="all">全部日期</option>'+dates.map(x=>'<option value="'+esc(x)+'">'+esc(dateText(x))+'</option>').join("");
-    box.value=dates.includes(old)?old:"all";
-  }
-
-  function orderCard(x){
-    const profit=Number(x.profit)||0;
-    const last=x.history&&x.history.length?x.history[x.history.length-1]:null;
-    return `
-      <div class="dy-card">
-        <div class="dy-top">
-          <div class="dy-title">${esc(x.model)}</div>
-          <div class="${profit>=0?"dy-green":"dy-red"}">${money(profit)}</div>
-        </div>
-        <div class="dy-meta">${esc(dateText(x.date))} · 快递单号：${esc(x.tracking||"未填写")}</div>
-        <div class="dy-meta">成本 ${money(x.cost)} · 售价 ${money(x.price)}</div>
-        ${x.note?'<div class="dy-meta">备注：'+esc(x.note)+'</div>':""}
-        ${last?'<div class="dy-meta">最近编辑：'+esc(last.type)+' · '+esc(last.reason)+'</div>':""}
-        <details class="address-details"><summary>查看收货地址</summary><div class="address-text">${esc(x.address||"未填写")}</div></details>
-        <button class="dy-edit" onclick="DysonApp.editOrder('${x.id}')">编辑订单</button>
-      </div>
-    `;
-  }
-
-  function renderOrders(){
-    const keyword=(document.getElementById("dySearch").value||"").trim().toLowerCase();
-    const filter=document.getElementById("dyDateFilter").value;
-    const data=orders.filter(x=>{
-      const text=[x.model,x.date,x.tracking,x.address,x.cost,x.price,x.profit,x.note].join(" ").toLowerCase();
-      return (filter==="all"||x.date===filter)&&text.includes(keyword);
-    });
-    const cost=data.reduce((s,x)=>s+(Number(x.cost)||0),0);
-    const price=data.reduce((s,x)=>s+(Number(x.price)||0),0);
-    const profit=data.reduce((s,x)=>s+(Number(x.profit)||0),0);
-    document.getElementById("dyCount").textContent=data.length;
-    document.getElementById("dyCostTotal").textContent=money(cost);
-    document.getElementById("dyPriceTotal").textContent=money(price);
-    document.getElementById("dyProfitTotal").textContent=money(profit);
-
-    const out=document.getElementById("dyOrderList");
-    if(!data.length){out.innerHTML='<div class="empty">没有找到订单。</div>';return}
-    const groups={};
-    data.forEach(x=>(groups[x.date||"未设置"]||(groups[x.date||"未设置"]=[])).push(x));
-    out.innerHTML=Object.keys(groups).sort().reverse().map(d=>{
-      const day=groups[d];
-      const total=day.reduce((s,x)=>s+(Number(x.profit)||0),0);
-      return '<div class="dy-group-title"><span>'+esc(d==="未设置"?"未设置日期":dateText(d))+'</span><span class="dy-green">当日利润：'+money(total)+'</span></div>'+day.map(orderCard).join("");
-    }).join("");
-  }
-
-  function resetStock(){
-    editingInventory=null;
-    ["dyStockModel","dyStockChannel","dyStockCost","dyStockNote","dySeller","dySoldNo"].forEach(x=>document.getElementById(x).value="");
-    document.getElementById("dyStockTitle").textContent="新增戴森库存";
-    document.getElementById("dySaveStock").textContent="添加库存";
-    document.getElementById("dySoldPanel").classList.add("hidden");
-  }
-
-  function saveStock(){
-    const model=document.getElementById("dyStockModel").value;
-    const cost=document.getElementById("dyStockCost").value;
-    if(!model||cost===""){alert("请填写型号和成本");return}
-    const item={
-      id:editingInventory||id(),
-      model,
-      channel:document.getElementById("dyStockChannel").value.trim(),
-      cost,
-      note:document.getElementById("dyStockNote").value.trim()
-    };
-    if(editingInventory) inventory=inventory.map(x=>x.id===editingInventory?item:x);
-    else inventory.unshift(item);
-    save(keys.inventory,inventory);
-    resetStock();renderStock();
-  }
-
-  function editStock(stockId){
-    const x=inventory.find(v=>v.id===stockId);
-    if(!x)return;
-    editingInventory=stockId;
-    document.getElementById("dyStockModel").value=x.model;
-    document.getElementById("dyStockChannel").value=x.channel||"";
-    document.getElementById("dyStockCost").value=x.cost;
-    document.getElementById("dyStockNote").value=x.note||"";
-    document.getElementById("dyStockTitle").textContent="编辑戴森库存";
-    document.getElementById("dySaveStock").textContent="保存修改";
-    document.getElementById("dySoldPanel").classList.remove("hidden");
-    window.scrollTo({top:0,behavior:"smooth"});
-  }
-
-  function markSold(){
-    const seller=document.getElementById("dySeller").value.trim();
-    const no=document.getElementById("dySoldNo").value.trim();
-    if(!seller||!no){alert("请填写销售人和单号");return}
-    const x=inventory.find(v=>v.id===editingInventory);
-    if(!x)return;
-    if(!confirm("确定标记为已售出吗？"))return;
-    sold.unshift({...x,seller,soldNo:no,soldDate:today()});
-    inventory=inventory.filter(x=>x.id!==editingInventory);
-    save(keys.inventory,inventory);save(keys.sold,sold);
-    resetStock();renderStock();
-  }
-
-  function deleteSold(stockId){
-    if(!confirm("确定删除这条已售出记录吗？"))return;
-    sold=sold.filter(x=>x.id!==stockId);
-    save(keys.sold,sold);renderStock();
-  }
-
-  function renderStock(){
-    const total=inventory.reduce((s,x)=>s+(Number(x.cost)||0),0);
-    document.getElementById("dyStockCount").textContent=inventory.length;
-    document.getElementById("dyStockTotal").textContent=money(total);
-    document.getElementById("dyStockList").innerHTML=inventory.length?inventory.map(x=>`
-      <div class="dy-card">
-        <div class="dy-top"><div class="dy-title">${esc(x.model)}</div><b>${money(x.cost)}</b></div>
-        <div class="dy-meta">渠道：${esc(x.channel||"未填写")}</div>
-        ${x.note?'<div class="dy-meta">备注：'+esc(x.note)+'</div>':""}
-        <button class="dy-edit" onclick="DysonApp.editStock('${x.id}')">编辑库存 / 标记售出</button>
-      </div>
-    `).join(""):'<div class="empty">暂时没有库存。</div>';
-
-    document.getElementById("dySoldList").innerHTML=sold.length?sold.map(x=>`
-      <div class="dy-card dy-warn">
-        <div class="dy-top"><div class="dy-title">${esc(x.model)}</div><b>已售出</b></div>
-        <div class="dy-meta">售出日期：${esc(dateText(x.soldDate))}</div>
-        <div class="dy-meta">销售人：${esc(x.seller)} · 单号：${esc(x.soldNo)}</div>
-        <div class="dy-meta">成本：${money(x.cost)}${x.note?" · 备注："+esc(x.note):""}</div>
-        <button class="dy-danger" onclick="DysonApp.deleteSold('${x.id}')">删除已售出记录</button>
-      </div>
-    `).join(""):'<div class="empty">暂时没有已售出记录。</div>';
-  }
-
-  function renderAfter(){
-    const box=document.getElementById("dyAfterList");
-    box.innerHTML=after.length?after.map(x=>`
-      <div class="dy-card dy-after">
-        <div class="dy-top"><div class="dy-title">${esc(x.model)}</div><b>${esc(x.afterReason)}</b></div>
-        <div class="dy-meta">售后日期：${esc(dateText(x.afterDate))} · 原订单日期：${esc(dateText(x.date))}</div>
-        <div class="dy-meta">快递单号：${esc(x.tracking||"未填写")}</div>
-        <div class="dy-meta">成本 ${money(x.cost)} · 售价 ${money(x.price)} · 利润 ${money(x.profit)}</div>
-        ${x.note?'<div class="dy-meta">备注：'+esc(x.note)+'</div>':""}
-        <details class="address-details"><summary>查看收货地址</summary><div class="address-text">${esc(x.address||"未填写")}</div></details>
-        <button class="dy-danger" onclick="DysonApp.deleteAfter('${x.id}')">删除售后记录</button>
-      </div>
-    `).join(""):'<div class="empty">暂时没有售后记录。</div>';
-  }
-
-  function deleteAfter(afterId){
-    if(!confirm("确定删除此售后记录吗？"))return;
-    after=after.filter(x=>x.id!==afterId);
-    save(keys.after,after);renderAfter();
-  }
-
-  function exportExcel(){
-    if(typeof XLSX==="undefined"){alert("Excel 功能正在加载，请稍后再试");return}
-    const wb=XLSX.utils.book_new();
-    function sheet(name,data){
-      XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(data),name);
-    }
-    sheet("戴森订单",orders);
-    sheet("戴森库存",inventory);
-    sheet("戴森已售出",sold);
-    sheet("戴森售后",after);
-    XLSX.writeFile(wb,"戴森数据备份_"+today().replaceAll("-","")+".xlsx");
-  }
-
-  function restoreExcel(){
-    const file=document.getElementById("dyRestoreFile").files[0];
-    if(!file){alert("请先选择备份文件");return}
-    if(typeof XLSX==="undefined"){alert("Excel 功能正在加载，请稍后再试");return}
-    if(!confirm("恢复会覆盖目前的戴森数据，确定继续吗？"))return;
-    const reader=new FileReader();
-    reader.onload=e=>{
-      const wb=XLSX.read(e.target.result,{type:"array"});
-      orders=XLSX.utils.sheet_to_json(wb.Sheets["戴森订单"]||{}, {defval:""});
-      inventory=XLSX.utils.sheet_to_json(wb.Sheets["戴森库存"]||{}, {defval:""});
-      sold=XLSX.utils.sheet_to_json(wb.Sheets["戴森已售出"]||{}, {defval:""});
-      after=XLSX.utils.sheet_to_json(wb.Sheets["戴森售后"]||{}, {defval:""});
-      save(keys.orders,orders);save(keys.inventory,inventory);save(keys.sold,sold);save(keys.after,after);
-      updateDateFilter();renderOrders();renderStock();renderAfter();
-      alert("戴森数据恢复成功");
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
-  function importExcel(){
-    const file=document.getElementById("dyImportFile").files[0];
-    if(!file){alert("请先选择 Excel 文件");return}
-    if(typeof XLSX==="undefined"){alert("Excel 功能正在加载，请稍后再试");return}
-    const reader=new FileReader();
-    reader.onload=e=>{
-      const wb=XLSX.read(e.target.result,{type:"array"});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{defval:""});
-      let added=0;
-      rows.forEach(r=>{
-        const model=String(r["型号"]||r["戴森型号"]||"").toUpperCase();
-        if(!["HD08","HD15","HD16"].includes(model))return;
-        const cost=r["成本"], price=r["售价"];
-        if(cost===""||price==="")return;
-        orders.unshift({
-          id:id(),
-          date:r["日期"]||today(),
-          model,
-          tracking:r["快递单号"]||"",
-          address:r["收货地址"]||"",
-          cost,price,
-          profit:((Number(price)||0)-(Number(cost)||0)).toFixed(2),
-          note:r["备注"]||"",
-          history:[]
-        });
-        added++;
-      });
-      save(keys.orders,orders);
-      updateDateFilter();renderOrders();
-      alert("成功导入 "+added+" 条戴森订单");
-      setPage("list");
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
-  window.DysonApp={
-    workspace,
-    page:setPage,
-    profit:calcProfit,
-    editType,
-    deleteType,
-    saveOrder,
-    editOrder,
-    deleteOrder,
-    orders:renderOrders,
-    saveStock,
-    editStock,
-    sold:markSold,
-    deleteSold,
-    export:exportExcel,
-    restore:restoreExcel,
-    import:importExcel,
-    deleteAfter
-  };
-
-  resetOrder();
-  resetStock();
-  updateDateFilter();
-  renderOrders();
-  renderStock();
-  renderAfter();
-})();
-</script>
-<!-- 修复 7plus / 戴森 页面切换 -->
-<style>
-/* 默认隐藏新版戴森区域 */
-#dysonAppV2 {
-  display: none !important;
-}
-
-/* 戴森模式：隐藏 7plus，保留顶部切换按钮和戴森 */
-body.dyson-mode main > :not(.workspace-switch):not(#dysonAppV2) {
-  display: none !important;
-}
-
-body.dyson-mode main > #dysonAppV2 {
-  display: block !important;
-}
-
-/* 隐藏旧版戴森入口 */
-#tab-dyson,
-#page-dyson {
-  display: none !important;
-}
-</style>
 </html>
