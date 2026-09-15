@@ -691,5 +691,89 @@ $('again').classList.toggle('hidden',!!security.pinHash);
 $('faceButton').classList.toggle('hidden',!security.credentialId);
 $('pin').addEventListener('keydown',e=>{if(e.key==='Enter')unlockPin()});
 </script>
+<!-- 7plus 分成 60% 功能 -->
+<script>
+(function(){
+  /* 重新计算利润：分成订单只计算你的 60% */
+  profit=function(order){
+    const original=Number(order.price||0)-Number(order.cost||0);
+    const rate=Number(order.shareRate)||1;
+    return Math.round(original*rate*100)/100;
+  };
+
+  /* 在 7plus 新增订单增加“分成”选项 */
+  const oldFormPage=formPage;
+  formPage=function(stock=false){
+    let html=oldFormPage(stock);
+
+    if(!stock&&brand==='seven'){
+      const oldHtml=
+        '<label for="remark">备注</label><textarea id="remark"></textarea>';
+
+      const newHtml=oldHtml+
+        '<label for="shareRate">分成</label>'+
+        '<select id="shareRate">'+
+          '<option value="1">不分成</option>'+
+          '<option value="0.6">分成 60%</option>'+
+        '</select>';
+
+      html=html.replace(oldHtml,newHtml);
+    }
+
+    return html;
+  };
+
+  /* 编辑订单时显示原来的分成选择 */
+  const oldFillForm=fillForm;
+  fillForm=function(){
+    oldFillForm();
+
+    const share=$('shareRate');
+
+    if(share){
+      const order=editing?db[editing.type][editing.index]:{};
+      share.value=Number(order.shareRate)===0.6?'0.6':'1';
+      share.onchange=calc;
+      calc();
+    }
+  };
+
+  /* 保存订单时保存分成比例 */
+  const oldFormData=formData;
+  formData=function(stock){
+    const data=oldFormData(stock);
+
+    if(!stock&&brand==='seven'){
+      data.shareRate=val('shareRate')==='0.6'?0.6:1;
+      data.profit=profit(data).toFixed(2);
+    }
+
+    return data;
+  };
+
+  /* 新增订单页面实时显示分成后的利润 */
+  calc=function(){
+    const cost=Number(val('cost'));
+    const price=Number(val('price'));
+    const rate=val('shareRate')==='0.6'?0.6:1;
+
+    $('profit').value=
+      val('cost')!==''&&val('price')!==''?
+      (Math.round((price-cost)*rate*100)/100).toFixed(2):'';
+  };
+
+  /* 订单明细显示分成说明 */
+  const oldDetail=detail;
+  detail=function(order){
+    let html=oldDetail(order);
+
+    if(brand==='seven'&&Number(order.shareRate)===0.6){
+      html+='<div class="meta good">分成：你拿 60%</div>';
+    }
+
+    return html;
+  };
+})();
+</script>
 </body>
 </html>
